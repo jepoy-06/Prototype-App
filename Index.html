@@ -1,671 +1,272 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MotorPH — Editable Prototype (Hybrid)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MotorPH Dashboard Prototype</title>
 <style>
-:root{
-  --bg:#071433;
-  --card:#0f2b54;
-  --accent:#2ea1ff;
-  --accent-hover:#1a8fe0;
-  --muted:#cfd6e3;
-  --glass:rgba(255,255,255,0.04);
-  --success:#1bb76e;
-  --warning:#ff9f1c;
-  --danger:#ff4d4d;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family:Inter, Arial, sans-serif;
-  background:linear-gradient(180deg,var(--bg),#02122b);
-  color:var(--muted);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
+  :root {
+    --bg: linear-gradient(135deg, #051021, #0f213d);
+    --card: rgba(255, 255, 255, 0.08);
+    --accent: #00b4ff;
+    --hover: rgba(0,180,255,0.25);
+    --text: #e9eef5;
+    --glass: rgba(255,255,255,0.1);
+  }
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Poppins', sans-serif; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex; justify-content: center; align-items: center;
+  }
+  
+  /* LOGIN */
+  .login-container {
+    background: var(--glass);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    width: 350px;
+    text-align: center;
+  }
+  .login-container h2 {
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+  .login-container input {
+    width: 100%; padding: 10px; margin: 10px 0;
+    border-radius: 10px; border: none;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+  }
+  .login-container button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #00172f;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .login-container button:hover { background: #1ad1ff; }
 
-/* App container */
-.app{ width:100%; max-width:1200px; }
+  /* DASHBOARD */
+  .dashboard {
+    width: 95%; max-width: 1300px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 20px;
+    padding: 20px 30px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    backdrop-filter: blur(15px);
+    display: none; flex-direction: column;
+    position: relative;
+  }
 
-/* Login card */
-.login-card{
-  width:360px;
-  margin:0 auto;
-  background:var(--glass);
-  backdrop-filter:blur(8px);
-  border-radius:12px;
-  padding:22px;
-  box-shadow:0 12px 30px rgba(0,0,0,0.5);
-  text-align:center;
-}
-.logo-placeholder{
-  width:72px;
-  height:72px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),#0fb7ff);
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  color:#022539;
-  font-weight:700;
-  font-size:28px;
-  margin-bottom:12px;
-  box-shadow:0 6px 18px rgba(46,161,255,0.12);
-}
-.login-card h2{ margin:6px 0 8px 0; color:#fff; font-size:20px; }
-.login-card p.muted{ color:var(--muted); font-size:13px; margin:8px 0 0 0; }
+  /* HEADER */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 25px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--accent);
+  }
+  .logo img {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+  }
+  .logout-btn {
+    background: crimson;
+    border: none; color: white;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer; font-weight: 500;
+  }
+  .logout-btn:hover { background: #ff5e5e; }
 
-/* Inputs & buttons */
-.input{
-  width:100%;
-  padding:10px 12px;
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,0.06);
-  background:transparent;
-  color:var(--muted);
-  margin-top:10px;
-}
-.btn{
-  width:100%;
-  padding:10px 12px;
-  border-radius:8px;
-  border:0;
-  background:var(--accent);
-  color:#022539;
-  cursor:pointer;
-  margin-top:12px;
-  transition:all .18s;
-}
-.btn:hover{ background:var(--accent-hover); transform:translateY(-2px); box-shadow:0 8px 20px rgba(46,161,255,0.12) }
+  /* CARDS GRID */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    justify-items: center;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    width: 220px; height: 180px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  }
+  .card:hover {
+    background: var(--hover);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,180,255,0.2);
+  }
+  .card-icon {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    color: var(--accent);
+  }
+  .card h4 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+  }
 
-/* Dashboard */
-.dashboard{
-  display:none;
-  width:100%;
-  max-width:1000px;
-  margin:0 auto;
-  position:relative;
-}
+  /* SIDE PANEL */
+  .side-panel {
+    position: fixed; top: 0; right: -400px;
+    width: 380px; height: 100%;
+    background: rgba(10,20,40,0.95);
+    backdrop-filter: blur(12px);
+    box-shadow: -5px 0 20px rgba(0,0,0,0.4);
+    transition: right 0.4s ease;
+    padding: 25px;
+    overflow-y: auto;
+    border-left: 2px solid var(--accent);
+  }
+  .side-panel.active { right: 0; }
+  .close-panel {
+    background: crimson; border: none; color: white;
+    padding: 6px 10px; border-radius: 8px; float: right; cursor: pointer;
+  }
+  .side-panel h2 {
+    margin: 0 0 20px;
+    color: var(--accent);
+  }
+  textarea, input, select {
+    width: 100%; margin: 6px 0; padding: 8px;
+    border-radius: 8px; border: none;
+    background: rgba(255,255,255,0.1);
+    color: white;
+  }
+  button {
+    background: var(--accent);
+    border: none; border-radius: 8px;
+    padding: 8px 12px; color: #00172f;
+    font-weight: 600; cursor: pointer;
+    margin-top: 10px;
+  }
+  button:hover { background: #1ad1ff; }
 
-/* small logout button top-left */
-.logout-small{
-  position:absolute;
-  top:-10px;
-  left:-10px;
-  transform:translate(-10px,-10px);
-  background:var(--danger);
-  color:#fff;
-  border:0;
-  border-radius:8px;
-  width:64px;
-  height:36px;
-  cursor:pointer;
-  box-shadow:0 8px 20px rgba(0,0,0,0.45);
-}
-
-/* Dashboard header */
-.header{
-  text-align:center;
-  margin-bottom:18px;
-  color:#fff;
-  font-size:20px;
-  font-weight:600;
-}
-
-/* Grid - centered, equal cards, gap 10px */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(3,250px);
-  gap:10px;
-  justify-content:center;
-  align-items:start;
-}
-
-/* Responsive */
-@media (max-width:1024px){ .grid{ grid-template-columns:repeat(2,240px); } }
-@media (max-width:600px){ .grid{ grid-template-columns:1fr; } .dashboard{padding:8px} .login-card{width:92%} }
-
-/* Card style */
-.card{
-  width:100%;
-  height:220px;
-  background:var(--card);
-  border-radius:12px;
-  padding:18px;
-  color:#fff;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  align-items:center;
-  text-align:center;
-  cursor:pointer;
-  transition:all .16s;
-}
-.card:hover{ transform:translateY(-6px); box-shadow:0 10px 30px rgba(0,0,0,0.5) }
-.card .icon{ font-size:30px; color:var(--accent); }
-.card h4{ margin:6px 0 2px 0; font-weight:600; }
-.card .value{ font-size:20px; margin-top:4px; color:#fff; font-weight:700; }
-
-/* progress */
-.progress{
-  width:100%;
-  height:10px;
-  background:rgba(255,255,255,0.06);
-  border-radius:8px;
-  overflow:hidden;
-  margin-top:8px;
-}
-.progress i{ display:block; height:100%; background:var(--accent); }
-
-/* Clock buttons inside card */
-.clock-actions{ display:flex; gap:8px; width:100%; margin-top:8px; }
-.clock-btn{ flex:1; padding:8px 10px; border-radius:8px; border:0; cursor:pointer; font-weight:600; }
-.clock-in{ background:var(--success); color:#fff; }
-.clock-out{ background:var(--warning); color:#022539; }
-
-/* Sliding glass panel on right */
-.slides{
-  position:fixed;
-  right:-120%;
-  top:0;
-  height:100%;
-  width:420px;
-  max-width:92%;
-  background:var(--glass);
-  backdrop-filter:blur(12px);
-  box-shadow:-6px 0 30px rgba(0,0,0,0.5);
-  border-radius:12px 0 0 12px;
-  padding:18px;
-  z-index:200;
-  transition:right .36s ease;
-  overflow:auto;
-}
-.slides.active{ right:0; }
-.slides h3{ margin-top:6px; margin-bottom:12px; color:#fff; }
-.slides .close-btn{ float:right; background:var(--danger); color:white; border:0; padding:6px 10px; border-radius:8px; cursor:pointer; }
-
-/* form inputs in panel */
-.panel-field{ display:flex; gap:8px; align-items:center; margin:8px 0; }
-.panel-field label{ width:130px; font-size:14px; color:var(--muted); }
-.panel-field input, .panel-field select, .panel-field textarea{
-  flex:1;
-  padding:8px 10px;
-  border-radius:6px;
-  border:1px solid rgba(255,255,255,0.06);
-  background:transparent;
-  color:var(--muted);
-}
-
-/* table in panel */
-.slides table{ width:100%; border-collapse:collapse; margin-top:10px; }
-.slides th, .slides td{ text-align:left; padding:8px; border:1px solid rgba(255,255,255,0.06); color:#fff; }
-
-/* toast */
-.toast{
-  position:fixed;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:22px;
-  background:var(--success);
-  color:#fff;
-  padding:10px 18px;
-  border-radius:8px;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .25s;
-  z-index:300;
-}
-.toast.show{ opacity:1; pointer-events:auto; }
-
-/* loading splash */
-.splash{
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:linear-gradient(180deg, rgba(2,6,20,0.9), rgba(2,6,20,0.95));
-  color:#fff;
-  z-index:400;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .35s;
-}
-.splash.show{ opacity:1; pointer-events:auto; }
-.splash .inner{
-  text-align:center;
-  padding:24px 28px;
-  border-radius:10px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  box-shadow:0 12px 40px rgba(0,0,0,0.6);
-}
-.splash h1{ margin:0 0 6px 0; font-size:20px; }
-.splash p{ margin:0; color:var(--muted); font-size:13px; }
+  @media (max-width: 768px) {
+    .cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .card { width: 160px; height: 150px; }
+    .logo { font-size: 1.2rem; }
+  }
 </style>
 </head>
 <body>
-  <div class="app">
 
-    <!-- LOGIN -->
-    <div id="loginCard" class="login-card" aria-live="polite">
-      <div class="logo-placeholder">M</div>
-      <h2>MotorPH</h2>
-      <input id="inpUser" class="input" placeholder="Username" aria-label="username"/>
-      <input id="inpPass" class="input" placeholder="Password" type="password" aria-label="password"/>
-      <button id="btnLogin" class="btn">Log In</button>
-      <p class="muted" style="margin-top:10px; color:var(--muted);">Allowed users: <strong>Kobi</strong>, <strong>Ceska</strong>, <strong>Jepoy</strong>. Password: <em>anything</em>.</p>
+<!-- LOGIN -->
+<div class="login-container" id="loginContainer">
+  <h2>MotorPH Login</h2>
+  <input type="text" id="username" placeholder="Enter Username (Kobi, Ceska, or Jepoy)">
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+  <div class="header">
+    <div class="logo">
+      <img src="https://cdn-icons-png.flaticon.com/512/1995/1995478.png" alt="MotorPH">
+      MotorPH Prototype Dashboard App
     </div>
-
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="dashboard" role="region" aria-hidden="true">
-      <button id="btnLogoutSmall" class="logout-small" title="Logout">Logout</button>
-      <div class="header">MotorPH Dashboard Prototype</div>
-
-      <div class="grid" role="grid" aria-label="dashboard tiles">
-        <div class="card" data-panel="records" role="button" tabindex="0" aria-pressed="false">
-          <div class="icon">👥</div>
-          <h4>Records</h4>
-          <div class="value" id="tile-records">3</div>
-          <div class="progress" aria-hidden="true"><i style="width:72%"></i></div>
-        </div>
-
-        <div class="card" data-panel="leaves" role="button" tabindex="0">
-          <div class="icon">🌿</div>
-          <h4>Leaves</h4>
-          <div class="value" id="tile-leaves">15</div>
-          <div class="progress" aria-hidden="true"><i style="width:60%"></i></div>
-        </div>
-
-        <div class="card" data-panel="payroll" role="button" tabindex="0">
-          <div class="icon">💰</div>
-          <h4>Payroll</h4>
-          <div class="value" id="tile-payroll">2025-10-15</div>
-        </div>
-
-        <div class="card" data-panel="tax" role="button" tabindex="0">
-          <div class="icon">📄</div>
-          <h4>Tax Data</h4>
-          <div class="value" id="tile-tax">PHP 170,642</div>
-        </div>
-
-        <div class="card" data-panel="performance" role="button" tabindex="0">
-          <div class="icon">⭐</div>
-          <h4>Performance</h4>
-          <div class="value" id="tile-performance">97%</div>
-          <div class="progress" aria-hidden="true"><i id="perf-bar" style="width:97%"></i></div>
-        </div>
-
-        <div class="card" data-panel="clock" role="button" tabindex="0">
-          <div class="icon">⏱️</div>
-          <h4>Clock</h4>
-          <div class="clock-actions" style="width:100%">
-            <button id="btnClockIn" class="clock-btn clock-in" type="button">Clock In</button>
-            <button id="btnClockOut" class="clock-btn clock-out" type="button">Clock Out</button>
-          </div>
-          <div style="margin-top:8px">Last: <span id="lastClock">—</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sliding right panel -->
-    <aside id="slides" class="slides" aria-hidden="true">
-      <button id="closeSlide" class="close-btn">Close</button>
-      <h3 id="slideTitle">Details</h3>
-      <div id="slideBody" aria-live="polite"></div>
-    </aside>
-
-    <!-- toast -->
-    <div id="toast" class="toast" aria-hidden="true"></div>
-
-    <!-- splash -->
-    <div id="splash" class="splash" aria-hidden="true">
-      <div class="inner">
-        <h1>MotorPH — Secure Employee Portal</h1>
-        <p>Loading your dashboard…</p>
-      </div>
-    </div>
-
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 
+  <div class="cards">
+    <div class="card" onclick="openPanel('Performance')"><div class="card-icon">⭐</div><h4>Performance</h4></div>
+    <div class="card" onclick="openPanel('Tax')"><div class="card-icon">💰</div><h4>Tax Filing</h4></div>
+    <div class="card" onclick="openPanel('Leaves')"><div class="card-icon">🌿</div><h4>Leaves</h4></div>
+    <div class="card" onclick="openPanel('Records')"><div class="card-icon">📋</div><h4>Records</h4></div>
+    <div class="card" onclick="openPanel('Pay')"><div class="card-icon">💵</div><h4>Payroll</h4></div>
+    <div class="card" onclick="openPanel('Payslip')"><div class="card-icon">📄</div><h4>Payslip</h4></div>
+    <div class="card" onclick="openPanel('Contributions')"><div class="card-icon">🏦</div><h4>Contributions</h4></div>
+    <div class="card" onclick="openPanel('Progress')"><div class="card-icon">📊</div><h4>Progress</h4></div>
+  </div>
+</div>
+
+<!-- SIDE PANEL -->
+<div class="side-panel" id="sidePanel">
+  <button class="close-panel" onclick="closePanel()">X</button>
+  <h2 id="panelTitle"></h2>
+  <div id="panelContent"></div>
+</div>
+
 <script>
-/* ---------- Config ---------- */
-const VALID_USERS = ['kobi','ceska','jepoy']; // lowercase accepted
-const DATA_KEY = 'mph_data_v1';
-const CLOCK_KEY = 'mph_clock';
+const users = ['kobi', 'ceska', 'jepoy'];
 
-/* ---------- Elements ---------- */
-const loginCard = document.getElementById('loginCard');
-const dashboard = document.getElementById('dashboard');
-const inpUser = document.getElementById('inpUser');
-const inpPass = document.getElementById('inpPass');
-const btnLogin = document.getElementById('btnLogin');
-const btnLogoutSmall = document.getElementById('btnLogoutSmall');
-
-const toastEl = document.getElementById('toast');
-const splash = document.getElementById('splash');
-
-const slides = document.getElementById('slides');
-const slideTitle = document.getElementById('slideTitle');
-const slideBody = document.getElementById('slideBody');
-const closeSlide = document.getElementById('closeSlide');
-
-const btnClockIn = document.getElementById('btnClockIn');
-const btnClockOut = document.getElementById('btnClockOut');
-const lastClockEl = document.getElementById('lastClock');
-
-const cards = document.querySelectorAll('.card');
-
-/* ---------- Helpers ---------- */
-function showToast(msg, ms=1600){
-  toastEl.textContent = msg;
-  toastEl.classList.add('show');
-  toastEl.setAttribute('aria-hidden','false');
-  setTimeout(()=>{ toastEl.classList.remove('show'); toastEl.setAttribute('aria-hidden','true'); }, ms);
+function login() {
+  const input = document.getElementById('username').value.trim().toLowerCase();
+  if (users.includes(input)) {
+    localStorage.setItem('loggedInUser', input);
+    showDashboard(input);
+  } else alert('Invalid username. Try Kobi, Ceska, or Jepoy.');
 }
 
-function showSplash(ms=1800){
-  splash.classList.add('show');
-  splash.setAttribute('aria-hidden','false');
-  return new Promise(resolve=>{
-    setTimeout(()=>{
-      splash.classList.remove('show');
-      splash.setAttribute('aria-hidden','true');
-      resolve();
-    }, ms);
-  });
+function showDashboard(user) {
+  document.getElementById('loginContainer').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'flex';
 }
 
-/* ---------- Data persistence ---------- */
-function defaultData(){
-  return {
-    records: { incomplete: 3, total: 72 },
-    leaves: { remaining: 15, used: 10 },
-    payroll: { nextRun: '2025-10-15', status: 'Ready' },
-    tax: { ytd: 'PHP 170,642', progress: 70 },
-    performance: { score: 97, tasks: 42, feedback: 8 }
-  };
-}
-function readData(){
-  try{
-    const raw = localStorage.getItem(DATA_KEY);
-    return raw ? JSON.parse(raw) : defaultData();
-  }catch(e){ return defaultData(); }
-}
-function writeData(obj){
-  localStorage.setItem(DATA_KEY, JSON.stringify(obj));
+function logout() {
+  localStorage.removeItem('loggedInUser');
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginContainer').style.display = 'block';
+  document.getElementById('username').value = '';
 }
 
-/* ---------- Session ---------- */
-function setSession(user){
-  localStorage.setItem('mph_user', user);
-}
-function clearSession(){
-  localStorage.removeItem('mph_user');
-}
-function getSession(){ return localStorage.getItem('mph_user') || null; }
-
-/* ---------- Clock history ---------- */
-function readClock(){
-  try{ return JSON.parse(localStorage.getItem(CLOCK_KEY) || '[]'); }catch(e){ return []; }
-}
-function writeClock(arr){ localStorage.setItem(CLOCK_KEY, JSON.stringify(arr)); }
-
-/* ---------- UI updates ---------- */
-function updateTilesFromData(){
-  const d = readData();
-  document.getElementById('tile-records').textContent = d.records.incomplete;
-  document.getElementById('tile-leaves').textContent = d.leaves.remaining;
-  document.getElementById('tile-payroll').textContent = d.payroll.nextRun;
-  document.getElementById('tile-tax').textContent = d.tax.ytd;
-  document.getElementById('tile-performance').textContent = d.performance.score + '%';
-  document.getElementById('perf-bar').style.width = (d.performance.score)+'%';
-}
-
-/* update last clock */
-function updateLastClock(){
-  const arr = readClock();
-  lastClockEl.textContent = arr[0] ? `${arr[0].action} @ ${arr[0].time}` : '—';
-}
-
-/* ---------- Login flow ---------- */
-btnLogin.addEventListener('click', async ()=>{
-  const raw = inpUser.value.trim();
-  if(!raw){ showToast('Enter username'); return; }
-  if(!VALID_USERS.includes(raw.toLowerCase())){ showToast('Access denied'); return; }
-  setSession(raw);
-  await showSplash(1400);
-  loginCard.style.display = 'none';
-  dashboard.style.display = 'block';
-  showToast(`Hello ${raw}, you are now clock-in ready!`);
-  // ensure tiles show latest
-  updateTilesFromData();
-  updateLastClock();
-});
-
-/* Auto-login on load (stay logged in until logout) */
-window.addEventListener('load', ()=>{
-  const user = getSession();
-  // initialize data if not present
-  if(!localStorage.getItem(DATA_KEY)) writeData(defaultData());
-  updateTilesFromData();
-  updateLastClock();
-  if(user){
-    // show splash then dashboard
-    setTimeout(()=> showSplash(1000).then(()=>{ loginCard.style.display='none'; dashboard.style.display='block'; showToast(`Hello ${user}, you are now clock-in ready!`); }),200);
-  } else {
-    loginCard.style.display = 'block';
-    dashboard.style.display = 'none';
-  }
-});
-
-/* Logout (does NOT clear data) */
-btnLogoutSmall.addEventListener('click', ()=>{
-  clearSession();
-  dashboard.style.display = 'none';
-  loginCard.style.display = 'block';
-  inpUser.value=''; inpPass.value='';
-  showToast('Logged out');
-});
-
-/* ---------- Clock actions ---------- */
-function addClock(kind){
-  const now = (new Date()).toLocaleString();
-  const arr = readClock();
-  arr.unshift({action:kind, time:now});
-  if(arr.length>500) arr.length = 500;
-  writeClock(arr);
-  updateLastClock();
-  showToast(`Clock ${kind} recorded`);
-}
-btnClockIn.addEventListener('click', ()=> addClock('IN'));
-btnClockOut.addEventListener('click', ()=> addClock('OUT'));
-
-/* ---------- Sliding panel behavior ---------- */
-const SAMPLE = {
-  records: {
-    title: 'Records',
-    form: () => {
-      const d = readData();
-      return `
-        <div class="panel-field"><label>Incomplete</label><input id="fld-records-incomplete" type="number" value="${d.records.incomplete}"></div>
-        <div class="panel-field"><label>Total Employees</label><input id="fld-records-total" type="number" value="${d.records.total}"></div>
-        <div style="margin-top:12px"><button id="save-records" class="btn">Save</button></div>
-      `;
-    }
-  },
-  leaves: {
-    title: 'Leaves',
-    form: () => {
-      const d = readData();
-      return `
-        <div class="panel-field"><label>Days Remaining</label><input id="fld-leaves-remaining" type="number" value="${d.leaves.remaining}"></div>
-        <div class="panel-field"><label>Used This Year</label><input id="fld-leaves-used" type="number" value="${d.leaves.used}"></div>
-        <div style="margin-top:12px"><button id="save-leaves" class="btn">Save</button></div>
-      `;
-    }
-  },
-  payroll: {
-    title: 'Payroll',
-    form: () => {
-      const d = readData();
-      return `
-        <div class="panel-field"><label>Next Run</label><input id="fld-payroll-nextrun" type="text" value="${d.payroll.nextRun}"></div>
-        <div class="panel-field"><label>Status</label><input id="fld-payroll-status" type="text" value="${d.payroll.status}"></div>
-        <div style="margin-top:12px"><button id="save-payroll" class="btn">Save</button></div>
-      `;
-    }
-  },
-  tax: {
-    title: 'Tax Summary',
-    form: () => {
-      const d = readData();
-      return `
-        <div class="panel-field"><label>YTD Income</label><input id="fld-tax-ytd" type="text" value="${d.tax.ytd}"></div>
-        <div class="panel-field"><label>Filing %</label><input id="fld-tax-progress" type="number" value="${d.tax.progress}"></div>
-        <div style="margin-top:12px"><button id="save-tax" class="btn">Save</button></div>
-      `;
-    }
-  },
-  performance: {
-    title: 'Performance',
-    form: () => {
-      const d = readData();
-      return `
-        <div class="panel-field"><label>Score (%)</label><input id="fld-perf-score" type="number" value="${d.performance.score}"></div>
-        <div class="panel-field"><label>Tasks Completed</label><input id="fld-perf-tasks" type="number" value="${d.performance.tasks}"></div>
-        <div class="panel-field"><label>Feedback</label><input id="fld-perf-feedback" type="number" value="${d.performance.feedback}"></div>
-        <div style="margin-top:12px"><button id="save-performance" class="btn">Save</button></div>
-      `;
-    }
-  }
+window.onload = () => {
+  const savedUser = localStorage.getItem('loggedInUser');
+  if (savedUser && users.includes(savedUser)) showDashboard(savedUser);
 };
 
-/* open panel */
-cards.forEach(card=>{
-  card.addEventListener('click', ()=>{
-    const panel = card.getAttribute('data-panel');
-    if(panel === 'clock'){
-      // show clock history table + clear button
-      const arr = readClock();
-      slideTitle.textContent = 'Clock History';
-      if(arr.length === 0){
-        slideBody.innerHTML = `<p>No clock records</p><div style="margin-top:12px"><button id="clear-history" class="btn" style="background:${getComputedStyle(document.documentElement).getPropertyValue('--danger')};color:#fff">Clear History</button></div>`;
-      } else {
-        const rows = arr.map(r=>`<tr><td>${r.action}</td><td>${r.time}</td></tr>`).join('');
-        slideBody.innerHTML = `<table><thead><tr><th>Action</th><th>Timestamp</th></tr></thead><tbody>${rows}</tbody></table><div style="margin-top:12px"><button id="clear-history" class="btn" style="background:${getComputedStyle(document.documentElement).getPropertyValue('--danger')};color:#fff">Clear History</button></div>`;
-      }
-      slides.classList.add('active');
-      slides.setAttribute('aria-hidden','false');
-      // attach clear-history
-      setTimeout(()=>{ // slight delay so DOM present
-        const btnClear = document.getElementById('clear-history');
-        if(btnClear) btnClear.addEventListener('click', ()=>{
-          writeClock([]);
-          slideBody.innerHTML = `<p>No clock records</p><div style="margin-top:12px"><button id="clear-history" class="btn" style="background:${getComputedStyle(document.documentElement).getPropertyValue('--danger')};color:#fff">Clear History</button></div>`;
-          updateLastClock();
-          showToast('Clock history cleared');
-        });
-      },50);
-    } else {
-      const info = SAMPLE[panel] || SAMPLE[panel];
-      // render form from SAMPLE
-      if(SAMPLE[panel]){
-        slideTitle.textContent = SAMPLE[panel].title;
-        slideBody.innerHTML = SAMPLE[panel].form();
-        slides.classList.add('active');
-        slides.setAttribute('aria-hidden','false');
-        // attach save handlers depending on panel
-        setTimeout(()=> attachSaveHandlers(panel), 50);
-      } else {
-        slideTitle.textContent = 'Details';
-        slideBody.innerHTML = '<p>No details available</p>';
-        slides.classList.add('active');
-      }
-    }
-  });
-  card.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter' || ev.key===' ') { ev.preventDefault(); card.click(); } });
-});
-
-/* close slide */
-closeSlide.addEventListener('click', ()=>{ slides.classList.remove('active'); slides.setAttribute('aria-hidden','true'); });
-
-/* ---------- Save handlers ---------- */
-function attachSaveHandlers(panel){
-  const d = readData();
-  if(panel === 'records'){
-    const btn = document.getElementById('save-records');
-    btn.addEventListener('click', ()=>{
-      const inc = Number(document.getElementById('fld-records-incomplete').value || 0);
-      const tot = Number(document.getElementById('fld-records-total').value || 0);
-      d.records.incomplete = inc;
-      d.records.total = tot;
-      writeData(d);
-      updateTilesFromData();
-      showToast('Records saved');
-      slides.classList.remove('active');
-    });
-  } else if(panel === 'leaves'){
-    const btn = document.getElementById('save-leaves');
-    btn.addEventListener('click', ()=>{
-      const rem = Number(document.getElementById('fld-leaves-remaining').value || 0);
-      const used = Number(document.getElementById('fld-leaves-used').value || 0);
-      d.leaves.remaining = rem;
-      d.leaves.used = used;
-      writeData(d);
-      updateTilesFromData();
-      showToast('Leaves saved');
-      slides.classList.remove('active');
-    });
-  } else if(panel === 'payroll'){
-    const btn = document.getElementById('save-payroll');
-    btn.addEventListener('click', ()=>{
-      const nr = document.getElementById('fld-payroll-nextrun').value.trim() || d.payroll.nextRun;
-      const st = document.getElementById('fld-payroll-status').value.trim() || d.payroll.status;
-      d.payroll.nextRun = nr;
-      d.payroll.status = st;
-      writeData(d);
-      updateTilesFromData();
-      showToast('Payroll saved');
-      slides.classList.remove('active');
-    });
-  } else if(panel === 'tax'){
-    const btn = document.getElementById('save-tax');
-    btn.addEventListener('click', ()=>{
-      const ytd = document.getElementById('fld-tax-ytd').value.trim() || d.tax.ytd;
-      const prog = Number(document.getElementById('fld-tax-progress').value || d.tax.progress);
-      d.tax.ytd = ytd;
-      d.tax.progress = prog;
-      writeData(d);
-      updateTilesFromData();
-      showToast('Tax saved');
-      slides.classList.remove('active');
-    });
-  } else if(panel === 'performance'){
-    const btn = document.getElementById('save-performance');
-    btn.addEventListener('click', ()=>{
-      const sc = Number(document.getElementById('fld-perf-score').value || d.performance.score);
-      const ts = Number(document.getElementById('fld-perf-tasks').value || d.performance.tasks);
-      const fb = Number(document.getElementById('fld-perf-feedback').value || d.performance.feedback);
-      d.performance.score = sc;
-      d.performance.tasks = ts;
-      d.performance.feedback = fb;
-      writeData(d);
-      updateTilesFromData();
-      showToast('Performance saved');
-      slides.classList.remove('active');
-    });
+function openPanel(type) {
+  const panel = document.getElementById('sidePanel');
+  const title = document.getElementById('panelTitle');
+  const content = document.getElementById('panelContent');
+  title.textContent = type + " Details";
+  let html = '';
+  switch(type) {
+    case 'Performance':
+      html = `<p>Performance Rating: <input value="92%"></p><progress value="92" max="100"></progress>`;
+      break;
+    case 'Tax':
+      html = `<p>Tax Filed: <input value="Yes"></p><p>Last Filing: <input value="2025-10-10"></p>`;
+      break;
+    case 'Leaves':
+      html = `<p>Available Leaves: <input value="5"></p><p>Request New Leave:</p><input type="date"> to <input type="date"><button>Submit</button>`;
+      break;
+    case 'Records':
+      html = `<textarea rows="5">Employee Name: ${localStorage.getItem('loggedInUser').toUpperCase()}\nPosition: Staff\nStatus: Active</textarea>`;
+      break;
+    case 'Pay':
+      html = `<p>Monthly Salary: <input value="₱25,000"></p>`;
+      break;
+    case 'Payslip':
+      html = `<button>Download Payslip</button>`;
+      break;
+    case 'Contributions':
+      html = `<p>SSS: <input value="₱500"></p><p>PhilHealth: <input value="₱300"></p><p>PAGIBIG: <input value="₱200"></p><p><b>Calendar:</b></p><input type="date">`;
+      break;
+    case 'Progress':
+      html = `<p>Performance Progress: <progress value="85" max="100"></progress><p>Tax Progress: <progress value="70" max="100"></progress>`;
+      break;
   }
+  content.innerHTML = html;
+  panel.classList.add('active');
 }
-
-/* ---------- Utilities ---------- */
-updateTilesFromData();
-updateLastClock();
-
+function closePanel() { document.getElementById('sidePanel').classList.remove('active'); }
 </script>
 </body>
 </html>
