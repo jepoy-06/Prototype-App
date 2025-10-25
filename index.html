@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MotorPH Prototype Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* small employee card used in Home and Records */
+  .record-card {
+    background: #f5f5f5;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .record-card .meta {
+    max-width: 75%;
+  }
+  .record-card h3 {
+    margin: 0 0 6px 0;
+    font-size: 1rem;
+  }
+  .record-card p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  .record-card button {
+    background: #1b6ef3;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+
+  .resume-popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .resume-card {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 12px;
+    width: 420px;
+    max-width: 95%;
+  }
+  .resume-card h2 {
+    margin-bottom: 10px;
+  }
+  .resume-card p { margin: 6px 0; font-size: 0.95rem; }
+  .resume-card .skills { margin-top: 8px; }
+  .resume-card button {
+    background: crimson;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 12px;
+    cursor: pointer;
+  }
+
+  /* LOGIN PAGE */
+  #loginPage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #007bff, #00bfff);
+  }
+  .login-card {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    width: 320px;
+    text-align: center;
+  }
+  .login-card h2 {
+    color: #007bff;
+    margin-bottom: 20px;
+  }
+  .login-card input, .login-card select {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  .login-card button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .login-card button:hover {
+    background-color: #0056b3;
+  }
+
+  /* DASHBOARD */
+  header {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  header img {
+    width: 70px;
+    height: 60px;
+    margin-right: 15px;
+    border-radius: 10px;
+  }
+  header h1 {
+    color: #007bff;
+    font-size: 1.6rem;
+  }
+
+  nav {
+    background-color: #007bff;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  nav button {
+    background: white;
+    color: #007bff;
+    border: none;
+    margin: 5px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  nav button:hover {
+    background-color: #0056b3;
+    color: white;
+  }
+
+  section {
+    display: none;
+    padding: 20px 40px;
+  }
+  .active {
+    display: block;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+  }
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .summary {
+    background: #f9f9f9;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 8px;
+  }
+  .download-btn {
+    margin-top: 10px;
+    padding: 10px 15px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .download-btn:hover {
+    background-color: #0056b3;
+  }
+
+  #employeeSection {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  #employeeList {
+    margin-top: 12px;
+  }
+  #searchEmployee {
+    width: 50%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #007bff;
+    border-radius: 6px;
+  }
+
+  .high-contrast {
+    background-color: #000;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage">
+  <div class="login-card">
+    <h2>MotorPH Login</h2>
+    <select id="roleSelect">
+      <option value="Admin">Admin</option>
+      <option value="Employee">Employee</option>
+    </select>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+  <header>
+    <img src="Motorph.png" alt="MotorPH logo" />
+    <h1>MotorPH Prototype Dashboard</h1>
+  </header>
+
+  <nav>
+    <button onclick="showSection('home')">Home</button>
+    <button onclick="showSection('performance')">Performance</button>
+    <button onclick="showSection('payroll')">Payroll</button>
+    <button onclick="showSection('requests')">Requests</button>
+    <button onclick="showSection('records')">Records</button>
+    <button onclick="showSection('addEmployee')">Add Employee</button>
+    <button onclick="logout()">Logout</button>
+  </nav>
+
+  <!-- HOME -->
+  <section id="home" class="active">
+    <h2>Welcome to MotorPH Dashboard</h2>
+    <p>Hello, <strong id="userRole"></strong>!</p>
+    <p>Today is <span id="todayDate"></span></p>
+    <p>
+      Time In: <input type="time" id="timeIn">
+      Time Out: <input type="time" id="timeOut">
+      <button onclick="clockInOut()">Submit</button>
+    </p>
+    <small id="clockMessage" style="color:green;font-weight:600;"></small>
+
+    <div id="employeeSection">
+      <h3>Employees</h3>
+      <input type="text" id="searchEmployee" placeholder="Search employee by name..." onkeyup="filterHomeEmployees()">
+      <div id="employeeList"></div>
+    </div>
+  </section>
+
+  <!-- PERFORMANCE -->
+  <section id="performance">
+    <h2>Employee Performance Report</h2>
+    <p>Month: October &nbsp;&nbsp; Year: 2025</p>
+    <table id="performanceTable">
+      <tr><th>Date</th><th>Login</th><th>Logout</th><th>Overtime</th><th>Total Hours</th><th>Status</th></tr>
+    </table>
+    <div class="summary">
+      <p><b>Days Present:</b> 20</p>
+      <p><b>Days Absent:</b> 2</p>
+      <p><b>Late Count:</b> 3</p>
+      <p><b>Total Overtime:</b> 10 hours</p>
+    </div>
+    <button class="download-btn" onclick="downloadPDF('Performance Report')">Download Performance Report</button>
+  </section>
+
+  <!-- PAYROLL -->
+  <section id="payroll">
+    <h2>Payroll (October 2025)</h2>
+    <p><b>Basic Salary:</b> ₱35,000.00</p>
+    <p><b>Overtime Pay:</b> ₱4,166.60</p>
+    <p><b>Gross Pay:</b> ₱39,166.60</p>
+    <p><b>Deductions:</b> SSS ₱1,250 | PhilHealth ₱875 | Pag-Ibig ₱100 | Loans ₱500</p>
+    <p><b>Net Pay:</b> ₱36,441.60</p>
+    <button class="download-btn" onclick="downloadPDF('Payslip')">Download Payslip</button>
+  </section>
+
+  <!-- REQUESTS -->
+  <section id="requests">
+    <h2>Leave Request</h2>
+    <label>Leave Type:</label>
+    <select><option>Vacation Leave</option><option>Sick Leave</option></select><br><br>
+    <label>Start Date:</label><input type="date"><br><br>
+    <label>End Date:</label><input type="date"><br><br>
+    <textarea rows="4" cols="40" placeholder="Enter reason for leave..."></textarea><br><br>
+    <button class="download-btn" onclick="submitForm()">Submit</button>
+    <small id="formMessage" style="color:green;font-weight:600;"></small>
+  </section>
+
+  <!-- RECORDS -->
+  <section id="records">
+    <h2>Employee Records</h2>
+    <button onclick="showRecords()" class="download-btn">📁 Show Employee List</button>
+    <div id="recordList" style="margin-top:20px;"></div>
+  </section>
+
+  <!-- ADD EMPLOYEE -->
+  <section id="addEmployee">
+    <h2>Add Employee</h2>
+    <input type="text" id="empName" placeholder="Employee Name"><br><br>
+    <input type="text" id="empPos" placeholder="Position"><br><br>
+    <button onclick="addEmployee()">Add</button>
+    <button onclick="cancelAdd()">Cancel</button>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  const today = new Date();
+  document.getElementById('todayDate').textContent = today.toDateString();
+
+  // ✅ Stay Logged In
+  window.onload = function() {
+    const savedRole = localStorage.getItem("userRole");
+    if (savedRole) {
+      document.getElementById('loginPage').style.display = "none";
+      document.getElementById('dashboard').style.display = "block";
+      document.getElementById('userRole').textContent = savedRole;
+    }
+  };
+
+  function login() {
+    const role = document.getElementById('roleSelect').value;
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+
+    if ((role === "Admin" && user === "admin" && pass === "admin123") ||
+        (role === "Employee" && user === "user" && pass === "user123")) {
+      localStorage.setItem("userRole", role);
+      document.getElementById('loginPage').style.display = "none";
+      document.getElementById('dashboard').style.display = "block";
+      document.getElementById('userRole').textContent = role;
+    } else {
+      alert("Invalid credentials!");
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("userRole");
+    document.getElementById('dashboard').style.display = "none";
+    document.getElementById('loginPage').style.display = "flex";
+  }
+
+  function showSection(id) {
+    document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ✅ Clock In/Out Reflects in Performance Table
+  function clockInOut() {
+    const timeIn = document.getElementById("timeIn").value;
+    const timeOut = document.getElementById("timeOut").value;
+    const message = document.getElementById("clockMessage");
+    const perfTable = document.getElementById("performanceTable");
+
+    if (!timeIn || !timeOut) {
+      alert("Please enter both Time In and Time Out.");
+      return;
+    }
+
+    const start = new Date(`${today.toISOString().split('T')[0]}T${timeIn}`);
+    const end = new Date(`${today.toISOString().split('T')[0]}T${timeOut}`);
+    const totalHours = ((end - start) / (1000 * 60 * 60)).toFixed(1);
+    const overtime = totalHours > 8 ? (totalHours - 8).toFixed(1) : 0;
+
+    const newRow = `
+      <tr>
+        <td>${today.toISOString().split('T')[0]}</td>
+        <td>${formatTime(timeIn)}</td>
+        <td>${formatTime(timeOut)}</td>
+        <td>${overtime}</td>
+        <td>${totalHours}</td>
+        <td>Present</td>
+      </tr>`;
+    perfTable.insertAdjacentHTML("beforeend", newRow);
+
+    message.textContent = "✅ Clock In/Out recorded successfully!";
+    setTimeout(() => { message.textContent = ""; }, 3000);
+    document.getElementById("timeIn").value = "";
+    document.getElementById("timeOut").value = "";
+  }
+
+  function formatTime(t) {
+    let [hour, minute] = t.split(":");
+    hour = parseInt(hour);
+    const suffix = hour >= 12 ? "PM" : "AM";
+    hour = ((hour + 11) % 12 + 1);
+    return `${hour}:${minute} ${suffix}`;
+  }
+
+  async function downloadPDF(title) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text(title, 10, 10);
+    doc.text('MotorPH Corporation', 10, 270);
+    doc.text('Authorized Signatory: Jeffrey Guballo – HR Manager', 10, 280);
+    doc.save(title.replace(/\s+/g, '_') + '.pdf');
+  }
+
+  // ✅ Employee master data (8 real employees)
+  const employeesData = [
+    { name: "About Beatriz", position: "Customer Service Representative", email: "beatriz.about@motorph.com", phone: "+63 912 345 6789", education: "BS in Communication – PUP", experience: "3 years in customer support.", skills: ["Client Relations", "Communication", "CRM", "Problem Solving"] },
+    { name: "John Rafael Castro", position: "Sales and Marketing Manager", email: "john.castro@motorph.com", phone: "+63 917 555 2323", education: "BSBA Marketing – DLSU", experience: "7 years in marketing and campaigns.", skills: ["Marketing", "Leadership", "Forecasting"] },
+    { name: "Carlos Ian Martinez", position: "Supply Chain and Logistic Manager", email: "carlos.martinez@motorph.com", phone: "+63 928 112 5566", education: "BS IE – UP", experience: "6 years in logistics and supply chain.", skills: ["Inventory", "Negotiation", "Planning"] },
+    { name: "Daniel Lee", position: "Payroll Manager", email: "daniel.lee@motorph.com", phone: "+63 935 321 8899", education: "BS Accountancy – ADMU", experience: "5 years in payroll management.", skills: ["Payroll", "Tax", "Leadership"] },
+    { name: "Frederick Romualdez", position: "Accounts Manager", email: "frederick.romualdez@motorph.com", phone: "+63 915 888 9087", education: "BSBA – UST", experience: "8 years in accounting.", skills: ["Accounting", "Budgeting", "Client Relations"] },
+    { name: "Melissa Cruz", position: "Payroll Staff", email: "melissa.cruz@motorph.com", phone: "+63 916 654 2223", education: "BS Accounting Tech – FEU", experience: "2 years in payroll data entry.", skills: ["Payroll", "Accuracy", "Data Entry"] },
+    { name: "Miguel Torres", position: "HR Supervisor", email: "miguel.torres@motorph.com", phone: "+63 919 777 4561", education: "BS Psychology – DLSU", experience: "4 years in HR operations.", skills: ["Recruitment", "HRIS", "Communication"] },
+    { name: "Jeffrey Guballo", position: "HR Manager", email: "jeffrey.guballo@motorph.com", phone: "+63 927 123 4567", education: "BS Psychology – DLSU", experience: "6 years in HR and management.", skills: ["Leadership", "Communication", "Strategic Planning"] }
+  ];
+
+  // ✅ Only show searched employee (no list by default)
+  function filterHomeEmployees() {
+    const term = document.getElementById('searchEmployee').value.toLowerCase();
+    const list = document.getElementById('employeeList');
+    list.innerHTML = "";
+
+    if (term.trim() === "") return; // Hide all if no search
+
+    const match = employeesData.filter(emp => emp.name.toLowerCase().includes(term));
+    if (match.length === 0) {
+      list.innerHTML = "<p>No matching employee found.</p>";
+      return;
+    }
+
+    match.forEach(emp => {
+      const card = `
+        <div class="record-card">
+          <div class="meta">
+            <h3>${emp.name}</h3>
+            <p>${emp.position}</p>
+          </div>
+          <button onclick='viewResume("${emp.name}")'>View Resume</button>
+        </div>`;
+      list.insertAdjacentHTML("beforeend", card);
+    });
+  }
+
+  function viewResume(name) {
+    const emp = employeesData.find(e => e.name === name);
+    const skills = emp.skills.map(s => `<li>${s}</li>`).join("");
+    const popup = document.createElement("div");
+    popup.className = "resume-popup";
+    popup.innerHTML = `
+      <div class="resume-card">
+        <h2>${emp.name}</h2>
+        <p><strong>Position:</strong> ${emp.position}</p>
+        <p><strong>Email:</strong> ${emp.email}</p>
+        <p><strong>Phone:</strong> ${emp.phone}</p>
+        <p><strong>Education:</strong> ${emp.education}</p>
+        <p><strong>Experience:</strong> ${emp.experience}</p>
+        <div class="skills"><strong>Skills:</strong><ul>${skills}</ul></div>
+        <button onclick="this.closest('.resume-popup').remove()">Close</button>
+      </div>`;
+    document.body.appendChild(popup);
+  }
+
+  function showRecords() {
+    const container = document.getElementById("recordList");
+    container.innerHTML = employeesData.map(emp => `
+      <div class="record-card">
+        <div class="meta">
+          <h3>${emp.name}</h3>
+          <p>${emp.position}</p>
+        </div>
+        <button onclick='viewResume("${emp.name}")'>View Resume</button>
+      </div>`).join("");
+  }
+
+  function submitForm() {
+    document.getElementById("formMessage").textContent = "✅ Request Submitted Successfully!";
+    setTimeout(() => { document.getElementById("formMessage").textContent = ""; }, 3000);
+  }
+
+  function addEmployee() {
+    alert("New employee added successfully!");
+  }
+
+  function cancelAdd() {
+    alert("Cancelled adding employee.");
+  }
+</script>
+</body>
+</html>
