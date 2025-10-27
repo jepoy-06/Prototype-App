@@ -6,224 +6,93 @@
 <title>MotorPH Prototype Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
+<!-- html2pdf for PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+
 <style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: #f4f6f9;
-    margin: 0;
-    padding: 0;
-  }
+  /* === Base & layout - DO NOT CHANGE layout positions === */
+  body { font-family: 'Poppins', sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
+  header { display:flex; align-items:center; background:#fff; padding:10px 20px; box-shadow:0 2px 5px rgba(0,0,0,0.08); position:relative; }
+  header img { width:70px; height:60px; margin-right:15px; border-radius:10px; }
+  header h1 { color:#007bff; font-size:1.6rem; margin:0; }
 
-  /* small employee card used in Home and Records */
-  .record-card {
-    background: #f5f5f5;
-    padding: 12px 16px;
-    margin-bottom: 12px;
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  /* folder icon (top-right) - admin only */
+  .admin-folder {
+    position:absolute;
+    right:18px;
+    top:12px;
+    background:linear-gradient(180deg,#fff8dc,#fff1b8);
+    border-radius:8px;
+    padding:8px 10px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+    border:1px solid rgba(0,0,0,0.06);
   }
-  .record-card .meta {
-    max-width: 75%;
-  }
-  .record-card h3 {
-    margin: 0 0 6px 0;
-    font-size: 1rem;
-  }
-  .record-card p {
-    margin: 0;
-    font-size: 0.9rem;
-  }
-  .record-card button {
-    background: #1b6ef3;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-left: 8px;
-  }
+  .admin-folder img { width:22px; height:22px; }
+  .admin-folder span { font-weight:600; color:#5a4a1a; font-size:0.9rem; }
 
-  .resume-popup {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  .resume-card {
-    background: white;
-    padding: 20px 30px;
-    border-radius: 12px;
-    width: 420px;
-    max-width: 95%;
-  }
-  .resume-card h2 {
-    margin-bottom: 10px;
-  }
-  .resume-card p { margin: 6px 0; font-size: 0.95rem; }
-  .resume-card .skills { margin-top: 8px; }
-  .resume-card button {
-    background: crimson;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin-top: 12px;
-    cursor: pointer;
-  }
+  nav { background-color:#007bff; padding:10px; display:flex; justify-content:center; flex-wrap:wrap; }
+  nav button { background:white; color:#007bff; border:none; margin:5px; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:600; transition:all .18s ease; box-shadow:0 4px 12px rgba(3,78,162,0.04); }
+  nav button:hover { transform:translateY(-2px); background:#0056b3; color:white; }
 
-  /* LOGIN PAGE */
-  #loginPage {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #007bff, #00bfff);
-  }
-  .login-card {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    width: 320px;
-    text-align: center;
-  }
-  .login-card h2 {
-    color: #007bff;
-    margin-bottom: 20px;
-  }
-  .login-card input, .login-card select {
-    width: 90%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  .login-card button {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .login-card button:hover {
-    background-color: #0056b3;
-  }
+  /* sections */
+  section { display:none; padding:20px 40px; }
+  .active { display:block; }
 
-  /* DASHBOARD */
-  header {
-    display: flex;
-    align-items: center;
-    background-color: #fff;
-    padding: 10px 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  header img {
-    width: 70px;
-    height: 60px;
-    margin-right: 15px;
-    border-radius: 10px;
-  }
-  header h1 {
-    color: #007bff;
-    font-size: 1.6rem;
-  }
+  /* small common UI */
+  .download-btn { margin-top:10px; padding:10px 15px; border:none; background:#007bff; color:white; border-radius:6px; cursor:pointer; }
+  .download-btn:hover { background:#0056b3; }
+  .summary { background:#f9f9f9; padding:15px; margin-top:20px; border-radius:8px; }
 
-  nav {
-    background-color: #007bff;
-    padding: 10px;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  nav button {
-    background: white;
-    color: #007bff;
-    border: none;
-    margin: 5px;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-  }
-  nav button:hover {
-    background-color: #0056b3;
-    color: white;
-  }
+  /* record card (Home & Records) */
+  .record-card { background:#f5f5f5; padding:12px 16px; margin-bottom:12px; border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,0.08); display:flex; justify-content:space-between; align-items:center; }
+  .record-card .meta { max-width:75%; display:flex; align-items:center; gap:12px; }
+  .record-thumb { width:36px; height:36px; border-radius:50%; object-fit:cover; flex-shrink:0; border:1px solid #e6e6e6; }
+  .record-card h3 { margin:0 0 6px 0; font-size:1rem; }
+  .record-card p { margin:0; font-size:0.9rem; color:#666; }
 
-  section {
-    display: none;
-    padding: 20px 40px;
-  }
-  .active {
-    display: block;
-  }
+  /* resume popup & inline resume card */
+  .resume-popup { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:1200; }
+  .resume-card { background:white; padding:20px 24px; border-radius:12px; width:420px; max-width:95%; box-shadow:0 12px 30px rgba(3,78,162,0.12); }
+  .resume-inline-card { background:#fff; padding:16px; border-radius:10px; box-shadow:0 6px 18px rgba(3,78,162,0.03); max-width:900px; margin:14px auto; display:flex; }
+  .resume-photo { width:96px; height:96px; border-radius:8px; object-fit:cover; margin-right:16px; }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  th, td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: center;
-  }
-  th {
-    background-color: #007bff;
-    color: white;
-  }
+  /* payslip style */
+  .payslip-card { max-width:900px; margin:18px auto; background:#fff; border-radius:10px; padding:18px; box-shadow:0 6px 18px rgba(3,78,162,0.06); }
+  .payslip-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .payslip-title { color:#007bff; font-size:1.2rem; margin:0; }
+  .payslip-narrative { color:#333; line-height:1.5; margin-bottom:12px; }
+  .payslip-table { width:100%; border-collapse:collapse; margin-bottom:12px; }
+  .payslip-table th, .payslip-table td { border:1px solid #e1e1e1; padding:8px; text-align:left; }
+  .payslip-table th { background:#f0f7ff; color:#003366; }
+  .netpay { text-align:right; background:#eaf3ff; padding:10px; border-radius:6px; font-weight:700; color:#007bff; }
 
-  .summary {
-    background: #f9f9f9;
-    padding: 15px;
-    margin-top: 20px;
-    border-radius: 8px;
-  }
-  .download-btn {
-    margin-top: 10px;
-    padding: 10px 15px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  .download-btn:hover {
-    background-color: #0056b3;
-  }
+  .controls { display:flex; gap:10px; align-items:center; margin-top:10px; }
+  .btn-primary { background:#007bff; color:#fff; padding:8px 12px; border-radius:6px; border:none; cursor:pointer; }
+  .btn-secondary { background:#e0e7ff; color:#003366; padding:8px 12px; border-radius:6px; border:none; cursor:pointer; }
 
-  #employeeSection {
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    margin-top: 20px;
-  }
-  #employeeList {
-    margin-top: 12px;
-  }
-  #searchEmployee {
-    width: 50%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #007bff;
-    border-radius: 6px;
-  }
+  /* request history (notepad modal + cards) */
+  .request-card { background:#fff; border-radius:8px; padding:12px; box-shadow:0 3px 10px rgba(0,0,0,0.06); margin-bottom:12px; max-width:900px; }
+  .request-meta { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+  .request-thumb { width:56px; height:56px; border-radius:6px; object-fit:cover; }
+  .status-badge { padding:6px 8px; border-radius:6px; font-weight:600; }
+  .status-pending { background:#fff4e6; color:#b46900; }
+  .status-approved { background:#e9f9ef; color:#0a7a3b; }
+  .status-rejected { background:#ffeef0; color:#b20a27; }
 
-  .high-contrast {
-    background-color: #000;
-    color: #fff;
+  /* notepad modal look */
+  .notepad-modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:1400; background:rgba(0,0,0,0.35); }
+  .notepad { width:420px; max-width:92%; background:linear-gradient(180deg,#fffbe6,#fff1b8); border-radius:10px; padding:16px; box-shadow:0 20px 50px rgba(0,0,0,0.18); border:1px solid rgba(0,0,0,0.06); }
+  .notepad h3 { margin:0 0 8px 0; color:#5a4a1a; }
+  .notepad .note { background:#fffef6; padding:10px; border-radius:8px; margin-bottom:8px; font-size:0.95rem; color:#333; }
+
+  /* small responsive tweaks */
+  @media (max-width:720px) {
+    .resume-inline-card { flex-direction:column; align-items:center; text-align:center; }
+    .resume-photo { margin-bottom:12px; margin-right:0; }
   }
 </style>
 </head>
@@ -231,15 +100,16 @@
 
 <!-- LOGIN PAGE -->
 <div id="loginPage">
-  <div class="login-card">
-    <h2>MotorPH Login</h2>
-    <select id="roleSelect">
+  <div class="login-card" style="background:white;padding:40px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,0.2);width:320px;text-align:center;">
+    <h2 style="color:#007bff;margin-bottom:20px;">MotorPH Login</h2>
+    <select id="roleSelect" style="width:90%;padding:10px;border-radius:6px;margin-bottom:10px;">
       <option value="Admin">Admin</option>
       <option value="Employee">Employee</option>
     </select>
-    <input type="text" id="username" placeholder="Username" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button onclick="login()">Login</button>
+    <input type="text" id="username" placeholder="Username (First name for employees)" required style="width:90%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ccc;">
+    <input type="password" id="password" placeholder="Password" required style="width:90%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ccc;">
+    <button onclick="login()" style="width:100%;padding:10px;border:none;border-radius:6px;background:#007bff;color:#fff;font-weight:bold;cursor:pointer;">Login</button>
+    <p style="font-size:12px;color:#fff;margin-top:10px;">Admin: Jeffrey Guballo / Hindikoalam<br>Employees: Use first name (e.g. Beatriz) / secretlang</p>
   </div>
 </div>
 
@@ -248,22 +118,28 @@
   <header>
     <img src="Motorph.png" alt="MotorPH logo" />
     <h1>MotorPH Prototype Dashboard</h1>
+
+    <!-- ADMIN FOLDER (top-right) -->
+    <div id="adminFolderBtn" class="admin-folder" title="Open Request Folder (Admin only)" style="display:none;" onclick="openFolderModal()">
+      <img src="https://cdn-icons-png.flaticon.com/512/727/727399.png" alt="folder icon">
+      <span>Request Folder</span>
+    </div>
   </header>
 
-  <nav>
-    <button onclick="showSection('home')">Home</button>
-    <button onclick="showSection('performance')">Performance</button>
-    <button onclick="showSection('payroll')">Payroll</button>
-    <button onclick="showSection('requests')">Requests</button>
-    <button onclick="showSection('records')">Records</button>
-    <button onclick="showSection('addEmployee')">Add Employee</button>
-    <button onclick="logout()">Logout</button>
+  <nav id="mainNav">
+    <button id="navHome" onclick="showSection('home')">Home</button>
+    <button id="navPerformance" onclick="showSection('performance')">Performance</button>
+    <button id="navPayroll" onclick="showSection('payroll')">Payroll</button>
+    <button id="navRequests" onclick="showSection('requests')">Requests</button>
+    <button id="navRecords" onclick="showSection('records')">Records</button>
+    <button id="navAddEmployee" onclick="showSection('addEmployee')">Add Employee</button>
+    <button id="navLogout" onclick="logout()">Logout</button>
   </nav>
 
   <!-- HOME -->
   <section id="home" class="active">
-    <h2>Welcome to MotorPH Dashboard</h2>
-    <p>Hello, <strong id="userRole"></strong>!</p>
+    <h2 id="homeTitle">Welcome to MotorPH Dashboard</h2>
+    <p id="greetingLine">Hello, <strong id="userRole"></strong>!</p>
     <p>Today is <span id="todayDate"></span></p>
     <p>
       Time In: <input type="time" id="timeIn">
@@ -287,10 +163,10 @@
       <tr><th>Date</th><th>Login</th><th>Logout</th><th>Overtime</th><th>Total Hours</th><th>Status</th></tr>
     </table>
     <div class="summary">
-      <p><b>Days Present:</b> 20</p>
-      <p><b>Days Absent:</b> 2</p>
-      <p><b>Late Count:</b> 3</p>
-      <p><b>Total Overtime:</b> 10 hours</p>
+      <p><b>Days Present:</b> <span id="daysPresent">0</span></p>
+      <p><b>Days Absent:</b> <span id="daysAbsent">0</span></p>
+      <p><b>Late Count:</b> <span id="lateCount">0</span></p>
+      <p><b>Total Overtime:</b> <span id="totalOvertime">0</span> hours</p>
     </div>
     <button class="download-btn" onclick="downloadPDF('Performance Report')">Download Performance Report</button>
   </section>
@@ -298,31 +174,57 @@
   <!-- PAYROLL -->
   <section id="payroll">
     <h2>Payroll (October 2025)</h2>
-    <p><b>Basic Salary:</b> ₱35,000.00</p>
-    <p><b>Overtime Pay:</b> ₱4,166.60</p>
-    <p><b>Gross Pay:</b> ₱39,166.60</p>
-    <p><b>Deductions:</b> SSS ₱1,250 | PhilHealth ₱875 | Pag-Ibig ₱100 | Loans ₱500</p>
-    <p><b>Net Pay:</b> ₱36,441.60</p>
-    <button class="download-btn" onclick="downloadPDF('Payslip')">Download Payslip</button>
+
+    <div id="payrollControls" style="background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);max-width:900px;margin:12px auto;">
+      <label for="employeeSelect"><strong>Select Employee:</strong></label>
+      <select id="employeeSelect" onchange="renderPayslipForSelected()">
+        <option value="">-- Choose employee --</option>
+      </select>
+      <span id="payrollNote" style="margin-left:12px;color:#666;">(Payslip is view-only. Only Admin can edit.)</span>
+    </div>
+
+    <div id="payslipDisplay"></div>
   </section>
 
   <!-- REQUESTS -->
   <section id="requests">
     <h2>Leave Request</h2>
-    <label>Leave Type:</label>
-    <select><option>Vacation Leave</option><option>Sick Leave</option></select><br><br>
-    <label>Start Date:</label><input type="date"><br><br>
-    <label>End Date:</label><input type="date"><br><br>
-    <textarea rows="4" cols="40" placeholder="Enter reason for leave..."></textarea><br><br>
-    <button class="download-btn" onclick="submitForm()">Submit</button>
-    <small id="formMessage" style="color:green;font-weight:600;"></small>
+    <div id="requestFormArea" style="max-width:900px;">
+      <label>Leave Type:</label>
+      <select id="leaveType"><option>Vacation Leave</option><option>Sick Leave</option></select><br><br>
+      <label>Start Date:</label><input type="date" id="leaveStart"><br><br>
+      <label>End Date:</label><input type="date" id="leaveEnd"><br><br>
+      <textarea id="leaveReason" rows="4" cols="40" placeholder="Enter reason for leave..."></textarea><br><br>
+      <button class="download-btn" onclick="submitLeaveRequest()">Submit</button>
+      <small id="formMessage" style="color:green;font-weight:600;margin-left:12px;"></small>
+    </div>
+
+    <hr style="margin:16px 0;">
+    <div id="requestHistoryArea" style="max-width:900px;">
+      <h3>Request History Folder (Admin)</h3>
+      <div id="requestHistoryList"></div>
+    </div>
   </section>
 
   <!-- RECORDS -->
   <section id="records">
     <h2>Employee Records</h2>
-    <button onclick="showRecords()" class="download-btn">📁 Show Employee List</button>
-    <div id="recordList" style="margin-top:20px;"></div>
+
+    <div id="recordsAdminArea">
+      <label for="recordsSelect"><strong>Select Employee to View Resume:</strong></label>
+      <select id="recordsSelect" onchange="renderResumeCard()">
+        <option value="">-- Choose employee --</option>
+      </select>
+      <div id="resumeCard" style="margin-top:14px;"></div>
+
+      <hr style="margin:16px 0;">
+      <button onclick="showRecords()" class="download-btn">📁 Show Employee List</button>
+      <div id="recordList" style="margin-top:20px;"></div>
+    </div>
+
+    <div id="recordsRestricted" style="display:none; color:#666; padding:12px; background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.04); max-width:900px;">
+      Access restricted to Admin users.
+    </div>
   </section>
 
   <!-- ADD EMPLOYEE -->
@@ -335,181 +237,680 @@
   </section>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-  const today = new Date();
-  document.getElementById('todayDate').textContent = today.toDateString();
+<!-- ADMIN Folder modal (notepad style) -->
+<div id="folderModal" class="notepad-modal" style="display:none;">
+  <div class="notepad" role="dialog" aria-modal="true" aria-label="Request Folder - Admin">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h3>Request Folder</h3>
+      <div>
+        <button onclick="closeFolderModal()" style="background:#fffbe6;border:1px solid #f0d88b;padding:6px 8px;border-radius:6px;cursor:pointer;">Close</button>
+      </div>
+    </div>
+    <p class="note">Notepad: Requests submitted by employees are stored here for Admin review.</p>
+    <div id="folderList" style="max-height:360px;overflow:auto;"></div>
+  </div>
+</div>
 
-  // ✅ Stay Logged In
-  window.onload = function() {
-    const savedRole = localStorage.getItem("userRole");
-    if (savedRole) {
-      document.getElementById('loginPage').style.display = "none";
-      document.getElementById('dashboard').style.display = "block";
-      document.getElementById('userRole').textContent = savedRole;
+<script>
+/* ============================
+   Data and storage keys
+   ============================ */
+const PERF_KEY = 'motorph_performance_records_v1';
+const REQUEST_KEY = 'motorph_request_history_v1';
+const SESSION_ROLE = 'motorph_role';
+const SESSION_USER = 'motorph_user';
+const SESSION_EMP_ID = 'motorph_emp_id';
+
+/* Admin & employee credentials */
+const ADMIN_CRED = { username: 'Jeffrey Guballo', password: 'Hindikoalam' };
+const EMP_PASSWORD = 'secretlang';
+
+/* Employee master data (photos are realistic Unsplash links) */
+const employeesData = [
+  { id:"beatriz", name:"Beatriz Santos", firstName:"beatriz", position:"Customer Service Representative", photo:"https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&w=600&q=80", basic:30000, sss:581.30, phil:412.50, pagibig:100.00, tax:1614.57, sssnum:"34-0512365-7", tin:"262-504-534", pagibignum:"1214-455-427-1", email:"beatriz.santos@motorph.com", phone:"0917-825-4401", education:"BS in Communication – PUP", experience:"3 years handling customer queries and after-sales support.", skills:["Client Relations","Communication","CRM Software","Problem Solving"] },
+  { id:"john", name:"John Rafael Castro", firstName:"john", position:"Sales and Marketing Manager", photo:"https://images.unsplash.com/photo-1554797589-9f2b5d6f0a1d?auto=format&fit=crop&w=600&q=80", basic:42000, sss:700.25, phil:500.75, pagibig:100.00, tax:2044.12, sssnum:"54-2319876-3", tin:"315-604-987", pagibignum:"1214-678-555-2", email:"john.castro@motorph.com", phone:"0917-512-3480", education:"BSBA Marketing – DLSU", experience:"7 years in sales & marketing, brand promotion, digital campaigns.", skills:["Marketing Strategy","Sales Forecasting","Leadership","Market Research"] },
+  { id:"carlos", name:"Carlos Ian Martinez", firstName:"carlos", position:"Supply Chain and Logistic Manager", photo:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80", basic:40000, sss:650.30, phil:487.50, pagibig:100.00, tax:1920.77, sssnum:"32-6542310-1", tin:"284-504-621", pagibignum:"1214-234-199-9", email:"carlos.martinez@motorph.com", phone:"0917-830-1192", education:"BS IE – UP", experience:"6 years managing supply chain operations and logistics.", skills:["Inventory Management","Operations Planning","Negotiation","Team Coordination"] },
+  { id:"daniel", name:"Daniel Lee", firstName:"daniel", position:"Payroll Manager", photo:"https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=600&q=80", basic:38000, sss:625.50, phil:470.00, pagibig:100.00, tax:1856.40, sssnum:"48-0312569-8", tin:"217-604-298", pagibignum:"1214-842-654-5", email:"daniel.lee@motorph.com", phone:"0917-600-5538", education:"BS Accountancy – ADMU", experience:"5 years leading payroll processing and tax compliance.", skills:["Payroll Systems","Financial Reporting","Team Leadership","Tax Compliance"] },
+  { id:"frederick", name:"Frederick Romualdez", firstName:"frederick", position:"Accounts Manager", photo:"https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80", basic:41000, sss:665.00, phil:492.50, pagibig:100.00, tax:1984.25, sssnum:"44-1236549-2", tin:"296-703-423", pagibignum:"1214-874-321-6", email:"frederick.romualdez@motorph.com", phone:"0917-505-3391", education:"BSBA – UST", experience:"8 years in accounting and account management.", skills:["Account Management","Client Relations","Budgeting","Report Analysis"] },
+  { id:"melissa", name:"Melissa Cruz", firstName:"melissa", position:"Payroll Staff", photo:"https://images.unsplash.com/photo-1545996124-2b0b9d4d1a6b?auto=format&fit=crop&w=600&q=80", basic:25000, sss:500.00, phil:375.00, pagibig:100.00, tax:1200.50, sssnum:"52-6542311-5", tin:"274-509-431", pagibignum:"1214-246-554-9", email:"melissa.cruz@motorph.com", phone:"0917-298-3310", education:"BS Accounting Tech – FEU", experience:"2 years payroll data entry and records maintenance.", skills:["Payroll Encoding","Accuracy","Data Entry","Employee Support"] },
+  { id:"miguel", name:"Miguel Torres", firstName:"miguel", position:"Payroll Staff", photo:"https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80", basic:27000, sss:520.00, phil:390.00, pagibig:100.00, tax:1300.00, sssnum:"41-0543287-3", tin:"295-674-231", pagibignum:"1214-314-678-2", email:"miguel.torres@motorph.com", phone:"0917-499-7803", education:"BS Business Management – UE", experience:"3 years payroll documentation and coordination.", skills:["Timekeeping","Record Auditing","MS Excel","Team Collaboration"] },
+  { id:"rachele", name:"Rachele Martinez", firstName:"rachele", position:"Payroll Staff", photo:"https://images.unsplash.com/photo-1544005313-1ddf6a5f9a43?auto=format&fit=crop&w=600&q=80", basic:26000, sss:510.00, phil:382.50, pagibig:100.00, tax:1250.00, sssnum:"45-9876543-1", tin:"283-514-908", pagibignum:"1214-555-333-1", email:"rachele.martinez@motorph.com", phone:"0917-904-5502", education:"BS HRM – University of Makati", experience:"2 years HR and payroll support.", skills:["Employee Records","Data Validation","Communication","HRIS Management"] }
+];
+
+/* ---------------------------
+   Utilities
+   --------------------------- */
+function formatTime12(t) {
+  if (!t) return '';
+  let [hour, minute] = t.split(':');
+  hour = parseInt(hour);
+  const suffix = hour >= 12 ? 'PM' : 'AM';
+  hour = ((hour + 11) % 12) + 1;
+  return `${hour}:${minute} ${suffix}`;
+}
+function randomDateBetween(start, end) {
+  const s = start.getTime(), e = end.getTime();
+  const t = new Date(s + Math.random() * (e - s));
+  return t.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+}
+
+/* ---------------------------
+   Session & Navigation visibility
+   --------------------------- */
+function setNavForRole(role) {
+  document.getElementById('navHome').style.display = 'inline-block';
+  document.getElementById('navLogout').style.display = 'inline-block';
+
+  ['navPerformance','navPayroll','navRequests','navRecords','navAddEmployee'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+
+  if (role === 'Admin') {
+    ['navPerformance','navPayroll','navRequests','navRecords','navAddEmployee'].forEach(id => {
+      document.getElementById(id).style.display = 'inline-block';
+    });
+    document.getElementById('adminFolderBtn').style.display = 'flex';
+  } else if (role === 'Employee') {
+    ['navPayroll','navRequests'].forEach(id => {
+      document.getElementById(id).style.display = 'inline-block';
+    });
+    document.getElementById('adminFolderBtn').style.display = 'none';
+  } else {
+    document.getElementById('adminFolderBtn').style.display = 'none';
+    document.getElementById('navLogout').style.display = 'none';
+  }
+}
+
+function onLoginSuccess(role, userDisplayName, empId) {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  if (role === 'Admin') {
+    document.getElementById('userRole').textContent = 'Admin ' + userDisplayName;
+  } else {
+    document.getElementById('userRole').textContent = 'Employee';
+  }
+  setNavForRole(role);
+  populateEmployeeSelect();
+  populateRecordsSelect();
+  renderPerformanceTable();
+  toggleRecordsArea(role);
+  updateGreeting();
+  renderRequestHistoryArea(); // ensure request history area updated
+}
+
+/* ---------------------------
+   Login
+   --------------------------- */
+function login() {
+  const roleChoice = document.getElementById('roleSelect').value;
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  // Admin exact match
+  if (username === ADMIN_CRED.username && password === ADMIN_CRED.password) {
+    localStorage.setItem(SESSION_ROLE, 'Admin');
+    localStorage.setItem(SESSION_USER, ADMIN_CRED.username);
+    localStorage.removeItem(SESSION_EMP_ID);
+    onLoginSuccess('Admin', ADMIN_CRED.username, null);
+    return;
+  }
+
+  // Employee login by first name (case-insensitive) with common password
+  const uname = username.toLowerCase();
+  const matched = employeesData.find(e => e.firstName.toLowerCase() === uname || e.name.toLowerCase().split(' ')[0] === uname);
+  if (matched && password === EMP_PASSWORD) {
+    localStorage.setItem(SESSION_ROLE, 'Employee');
+    localStorage.setItem(SESSION_USER, matched.name);
+    localStorage.setItem(SESSION_EMP_ID, matched.id);
+    onLoginSuccess('Employee', matched.name, matched.id);
+    // automatic show only employee tabs already handled in setNavForRole
+    return;
+  }
+
+  alert('Invalid credentials!');
+}
+
+/* ---------------------------
+   Logout
+   --------------------------- */
+function logout() {
+  localStorage.removeItem(SESSION_ROLE);
+  localStorage.removeItem(SESSION_USER);
+  localStorage.removeItem(SESSION_EMP_ID);
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  setNavForRole(null);
+}
+
+/* Restore session on load */
+window.addEventListener('load', () => {
+  document.getElementById('todayDate').textContent = new Date().toDateString();
+  const role = localStorage.getItem(SESSION_ROLE);
+  const user = localStorage.getItem(SESSION_USER);
+  const empId = localStorage.getItem(SESSION_EMP_ID);
+  if (role && user) {
+    onLoginSuccess(role, user, empId);
+  } else {
+    setNavForRole(null);
+  }
+});
+
+/* Greeting update */
+function updateGreeting() {
+  const role = localStorage.getItem(SESSION_ROLE);
+  if (role === 'Admin') {
+    const user = localStorage.getItem(SESSION_USER) || 'Admin';
+    document.getElementById('greetingLine').innerHTML = `Welcome, Admin <strong>${user}</strong>!`;
+  } else {
+    document.getElementById('greetingLine').innerHTML = `Welcome, Employee!`;
+  }
+}
+
+/* ---------------------------
+   Performance (persistent)
+   --------------------------- */
+function getPerfRecords() {
+  const raw = localStorage.getItem(PERF_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+function savePerfRecords(arr) {
+  localStorage.setItem(PERF_KEY, JSON.stringify(arr));
+}
+function clockInOut() {
+  const timeIn = document.getElementById("timeIn").value;
+  const timeOut = document.getElementById("timeOut").value;
+  const message = document.getElementById("clockMessage");
+
+  if (!timeIn || !timeOut) {
+    alert("Please enter both Time In and Time Out.");
+    return;
+  }
+
+  const dateStr = new Date().toISOString().split('T')[0];
+  const start = new Date(`${dateStr}T${timeIn}`);
+  const end = new Date(`${dateStr}T${timeOut}`);
+  let diffH = (end - start) / (1000 * 60 * 60);
+  diffH = Math.round(diffH * 10) / 10;
+  const overtime = diffH > 8 ? Math.round((diffH - 8) * 10) / 10 : 0;
+
+  const rec = { date: dateStr, timeIn: timeIn, timeOut: timeOut, totalHours: diffH, overtime: overtime, status: 'Present' };
+  const arr = getPerfRecords();
+  arr.push(rec);
+  savePerfRecords(arr);
+  renderPerformanceTable();
+
+  message.textContent = "✅ Clock In/Out recorded successfully!";
+  setTimeout(() => { message.textContent = ""; }, 3000);
+  document.getElementById("timeIn").value = "";
+  document.getElementById("timeOut").value = "";
+}
+
+function renderPerformanceTable() {
+  const table = document.getElementById('performanceTable');
+  table.innerHTML = '<tr><th>Date</th><th>Login</th><th>Logout</th><th>Overtime</th><th>Total Hours</th><th>Status</th></tr>';
+  const arr = getPerfRecords();
+  let totalOver = 0, daysPresent = 0;
+  arr.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.date}</td><td>${formatTime12(r.timeIn)}</td><td>${formatTime12(r.timeOut)}</td><td>${r.overtime}</td><td>${r.totalHours}</td><td>${r.status}</td>`;
+    table.appendChild(tr);
+    totalOver += Number(r.overtime || 0);
+    if (r.status === 'Present') daysPresent++;
+  });
+  document.getElementById('totalOvertime').textContent = totalOver;
+  document.getElementById('daysPresent').textContent = daysPresent;
+  document.getElementById('daysAbsent').textContent = Math.max(0, 22 - daysPresent);
+  document.getElementById('lateCount').textContent = 0;
+}
+
+/* ---------------------------
+   Payroll & Payslip rendering
+   --------------------------- */
+function populateEmployeeSelect() {
+  const role = localStorage.getItem(SESSION_ROLE);
+  const empId = localStorage.getItem(SESSION_EMP_ID);
+  const select = document.getElementById('employeeSelect');
+  select.innerHTML = '<option value="">-- Choose employee --</option>';
+
+  if (role === 'Admin') {
+    employeesData.forEach(emp => {
+      const opt = document.createElement('option');
+      opt.value = emp.id; opt.textContent = emp.name;
+      select.appendChild(opt);
+    });
+  } else if (role === 'Employee' && empId) {
+    const emp = employeesData.find(e => e.id === empId);
+    if (emp) {
+      const opt = document.createElement('option');
+      opt.value = emp.id; opt.textContent = emp.name;
+      select.appendChild(opt);
+      select.value = emp.id;
+      renderPayslipForSelected();
     }
+  }
+}
+
+function renderPayslipForSelected() {
+  const sel = document.getElementById('employeeSelect').value;
+  const display = document.getElementById('payslipDisplay');
+  display.innerHTML = "";
+  if (!sel) return;
+  const emp = employeesData.find(e => e.id === sel);
+  if (!emp) return;
+
+  const periodStart = new Date(2025,9,8); // Oct 8 2025
+  const periodEnd = new Date(2025,10,7);  // Nov 7 2025
+  const issueDate = randomDateBetween(periodStart, periodEnd);
+  const totalDeductions = +(emp.sss + emp.phil + emp.pagibig + emp.tax).toFixed(2);
+  const netPay = +(emp.basic - totalDeductions).toFixed(2);
+  const payslipId = `payslip-${emp.id}`;
+
+  const payslipHTML = `
+    <div id="${payslipId}" class="payslip-card" aria-live="polite">
+      <div class="payslip-top">
+        <div>
+          <div class="payslip-title">MotorPH Corporation — Payslip</div>
+          <div style="color:#666;font-size:0.9rem;margin-top:6px;">Pay Period: October 8, 2025 — November 7, 2025</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:700">${emp.name}</div>
+          <div style="color:#666">${emp.position}</div>
+          <div style="color:#666;margin-top:6px;">Date Issued: ${issueDate}</div>
+        </div>
+      </div>
+
+      <div class="payslip-narrative">
+        This pay slip is issued by MotorPH covering October 8, 2025 to November 7, 2025.
+        ${emp.name}'s basic wage for the period is <strong>₱${emp.basic.toLocaleString()}</strong>, which also serves as their gross salary.
+        From this amount, the following deductions were applied:
+        <ul>
+          <li>SSS Contribution: ₱${emp.sss.toFixed(2)}</li>
+          <li>PhilHealth Contribution: ₱${emp.phil.toFixed(2)}</li>
+          <li>Pag-IBIG Contribution: ₱${emp.pagibig.toFixed(2)}</li>
+          <li>Tax Due: ₱${emp.tax.toFixed(2)}</li>
+        </ul>
+        The total deductions amount to <strong>₱${totalDeductions.toLocaleString(undefined,{minimumFractionDigits:2})}</strong>,
+        resulting in a net pay of <strong>₱${netPay.toLocaleString(undefined,{minimumFractionDigits:2})}</strong>.
+        <br><br>
+        Government identification numbers:
+        <br>SSS: ${emp.sssnum} &nbsp;|&nbsp; TIN: ${emp.tin} &nbsp;|&nbsp; PAG-IBIG: ${emp.pagibignum}
+      </div>
+
+      <table class="payslip-table" aria-hidden="false">
+        <tr><th>Field</th><th>Details</th></tr>
+        <tr><td>MotorPH</td><td>MotorPH Corporation</td></tr>
+        <tr><td>Date Issued</td><td>${issueDate}</td></tr>
+        <tr><td>Employee</td><td>${emp.name}</td></tr>
+        <tr><td>Pay Period</td><td>October 8 – November 7, 2025</td></tr>
+        <tr><td>SSS Number</td><td>${emp.sssnum}</td></tr>
+        <tr><td>TIN Number</td><td>${emp.tin}</td></tr>
+        <tr><td>Pag-IBIG Number</td><td>${emp.pagibignum}</td></tr>
+        <tr><td>Basic Wage</td><td>₱${emp.basic.toLocaleString()}</td></tr>
+        <tr><td>Gross Salary</td><td>₱${emp.basic.toLocaleString()}</td></tr>
+        <tr><th colspan="2">Deductions</th></tr>
+        <tr><td>SSS Contribution</td><td>₱${emp.sss.toFixed(2)}</td></tr>
+        <tr><td>PhilHealth Contribution</td><td>₱${emp.phil.toFixed(2)}</td></tr>
+        <tr><td>Pag-IBIG Contribution</td><td>₱${emp.pagibig.toFixed(2)}</td></tr>
+        <tr><td>Tax Due</td><td>₱${emp.tax.toFixed(2)}</td></tr>
+        <tr><td><strong>Total Deductions</strong></td><td><strong>₱${totalDeductions.toLocaleString(undefined,{minimumFractionDigits:2})}</strong></td></tr>
+      </table>
+
+      <div class="netpay">Net Pay: ₱${netPay.toLocaleString(undefined,{minimumFractionDigits:2})}</div>
+
+      <div class="controls" style="margin-top:14px;">
+        <button class="btn-primary" onclick="downloadPayslipPDF('${payslipId}','${emp.name.replace(/\s+/g,'_')}')">🧾 Download PDF</button>
+        ${ (localStorage.getItem(SESSION_ROLE) === 'Admin') ? `<button class="btn-secondary" onclick="editPayslip('${emp.id}')">✏️ Edit Payslip</button>` : '' }
+      </div>
+
+      <div class="readonly-note">Note: This payslip is view-only. Only Admin can edit payslips.</div>
+    </div>
+  `;
+  display.insertAdjacentHTML('beforeend', payslipHTML);
+  document.getElementById(payslipId).scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function downloadPayslipPDF(elementId, filenameBase='payslip') {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+  const clone = element.cloneNode(true);
+  clone.querySelectorAll('.controls').forEach(c => c.remove());
+  const header = document.createElement('div');
+  header.style.display='flex'; header.style.justifyContent='space-between'; header.style.alignItems='center'; header.style.marginBottom='12px';
+  header.innerHTML = `<div style="font-weight:800;color:#007bff;font-size:18px">MotorPH Corporation</div><div style="font-size:12px;color:#666">Payslip / ${new Date().toLocaleDateString()}</div>`;
+  clone.prepend(header);
+  const opt = { margin:[10,10,10,10], filename:`${filenameBase}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'} };
+  html2pdf().set(opt).from(clone).save();
+}
+
+function editPayslip(empId) {
+  alert("Edit mode (Admin) — implement editing flow here.");
+}
+
+/* ---------------------------
+   Requests & Folder (notepad)
+   --------------------------- */
+function getRequestHistory() {
+  const raw = localStorage.getItem(REQUEST_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+function saveRequestHistory(arr) {
+  localStorage.setItem(REQUEST_KEY, JSON.stringify(arr));
+}
+
+function submitLeaveRequest() {
+  const role = localStorage.getItem(SESSION_ROLE);
+  const empId = localStorage.getItem(SESSION_EMP_ID);
+  const employeeName = (role === 'Admin') ? (document.getElementById('username').value || localStorage.getItem(SESSION_USER)) : localStorage.getItem(SESSION_USER);
+  const leaveType = document.getElementById('leaveType').value;
+  const start = document.getElementById('leaveStart').value;
+  const end = document.getElementById('leaveEnd').value;
+  const reason = document.getElementById('leaveReason').value.trim();
+
+  if (!leaveType || !start || !end || !reason) {
+    alert('Please fill all leave fields.');
+    return;
+  }
+
+  const record = {
+    id: 'req_' + Date.now(),
+    employeeId: empId || null,
+    employeeName: employeeName || 'Unknown',
+    type: leaveType,
+    startDate: start,
+    endDate: end,
+    reason: reason,
+    filedAt: new Date().toISOString(),
+    status: 'Pending'
   };
 
-  function login() {
-    const role = document.getElementById('roleSelect').value;
-    const user = document.getElementById('username').value;
-    const pass = document.getElementById('password').value;
+  const arr = getRequestHistory();
+  arr.unshift(record); // newest first
+  saveRequestHistory(arr);
 
-    if ((role === "Admin" && user === "admin" && pass === "admin123") ||
-        (role === "Employee" && user === "user" && pass === "user123")) {
-      localStorage.setItem("userRole", role);
-      document.getElementById('loginPage').style.display = "none";
-      document.getElementById('dashboard').style.display = "block";
-      document.getElementById('userRole').textContent = role;
-    } else {
-      alert("Invalid credentials!");
-    }
+  document.getElementById('formMessage').textContent = '✅ Leave request submitted successfully!';
+  setTimeout(() => { document.getElementById('formMessage').textContent = ''; }, 3000);
+
+  document.getElementById('leaveStart').value = '';
+  document.getElementById('leaveEnd').value = '';
+  document.getElementById('leaveReason').value = '';
+
+  // update admin folder & history area
+  renderRequestHistoryArea();
+  renderFolderList();
+}
+
+function renderRequestHistoryArea() {
+  const container = document.getElementById('requestHistoryList');
+  container.innerHTML = '';
+  const arr = getRequestHistory();
+  const role = localStorage.getItem(SESSION_ROLE);
+  if (role !== 'Admin') {
+    container.innerHTML = '<p style="color:#666;">Requests are sent to Admin. Admin will review them in the Request Folder.</p>';
+    return;
   }
-
-  function logout() {
-    localStorage.removeItem("userRole");
-    document.getElementById('dashboard').style.display = "none";
-    document.getElementById('loginPage').style.display = "flex";
+  if (!arr.length) {
+    container.innerHTML = '<p style="color:#666;">No requests filed yet.</p>';
+    return;
   }
-
-  function showSection(id) {
-    document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-
-  // ✅ Clock In/Out Reflects in Performance Table
-  function clockInOut() {
-    const timeIn = document.getElementById("timeIn").value;
-    const timeOut = document.getElementById("timeOut").value;
-    const message = document.getElementById("clockMessage");
-    const perfTable = document.getElementById("performanceTable");
-
-    if (!timeIn || !timeOut) {
-      alert("Please enter both Time In and Time Out.");
-      return;
-    }
-
-    const start = new Date(`${today.toISOString().split('T')[0]}T${timeIn}`);
-    const end = new Date(`${today.toISOString().split('T')[0]}T${timeOut}`);
-    const totalHours = ((end - start) / (1000 * 60 * 60)).toFixed(1);
-    const overtime = totalHours > 8 ? (totalHours - 8).toFixed(1) : 0;
-
-    const newRow = `
-      <tr>
-        <td>${today.toISOString().split('T')[0]}</td>
-        <td>${formatTime(timeIn)}</td>
-        <td>${formatTime(timeOut)}</td>
-        <td>${overtime}</td>
-        <td>${totalHours}</td>
-        <td>Present</td>
-      </tr>`;
-    perfTable.insertAdjacentHTML("beforeend", newRow);
-
-    message.textContent = "✅ Clock In/Out recorded successfully!";
-    setTimeout(() => { message.textContent = ""; }, 3000);
-    document.getElementById("timeIn").value = "";
-    document.getElementById("timeOut").value = "";
-  }
-
-  function formatTime(t) {
-    let [hour, minute] = t.split(":");
-    hour = parseInt(hour);
-    const suffix = hour >= 12 ? "PM" : "AM";
-    hour = ((hour + 11) % 12 + 1);
-    return `${hour}:${minute} ${suffix}`;
-  }
-
-  async function downloadPDF(title) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.text(title, 10, 10);
-    doc.text('MotorPH Corporation', 10, 270);
-    doc.text('Authorized Signatory: Jeffrey Guballo – HR Manager', 10, 280);
-    doc.save(title.replace(/\s+/g, '_') + '.pdf');
-  }
-
-  // ✅ Employee master data (8 real employees)
-  const employeesData = [
-    { name: "About Beatriz", position: "Customer Service Representative", email: "beatriz.about@motorph.com", phone: "+63 912 345 6789", education: "BS in Communication – PUP", experience: "3 years in customer support.", skills: ["Client Relations", "Communication", "CRM", "Problem Solving"] },
-    { name: "John Rafael Castro", position: "Sales and Marketing Manager", email: "john.castro@motorph.com", phone: "+63 917 555 2323", education: "BSBA Marketing – DLSU", experience: "7 years in marketing and campaigns.", skills: ["Marketing", "Leadership", "Forecasting"] },
-    { name: "Carlos Ian Martinez", position: "Supply Chain and Logistic Manager", email: "carlos.martinez@motorph.com", phone: "+63 928 112 5566", education: "BS IE – UP", experience: "6 years in logistics and supply chain.", skills: ["Inventory", "Negotiation", "Planning"] },
-    { name: "Daniel Lee", position: "Payroll Manager", email: "daniel.lee@motorph.com", phone: "+63 935 321 8899", education: "BS Accountancy – ADMU", experience: "5 years in payroll management.", skills: ["Payroll", "Tax", "Leadership"] },
-    { name: "Frederick Romualdez", position: "Accounts Manager", email: "frederick.romualdez@motorph.com", phone: "+63 915 888 9087", education: "BSBA – UST", experience: "8 years in accounting.", skills: ["Accounting", "Budgeting", "Client Relations"] },
-    { name: "Melissa Cruz", position: "Payroll Staff", email: "melissa.cruz@motorph.com", phone: "+63 916 654 2223", education: "BS Accounting Tech – FEU", experience: "2 years in payroll data entry.", skills: ["Payroll", "Accuracy", "Data Entry"] },
-    { name: "Miguel Torres", position: "HR Supervisor", email: "miguel.torres@motorph.com", phone: "+63 919 777 4561", education: "BS Psychology – DLSU", experience: "4 years in HR operations.", skills: ["Recruitment", "HRIS", "Communication"] },
-    { name: "Jeffrey Guballo", position: "HR Manager", email: "jeffrey.guballo@motorph.com", phone: "+63 927 123 4567", education: "BS Psychology – DLSU", experience: "6 years in HR and management.", skills: ["Leadership", "Communication", "Strategic Planning"] }
-  ];
-
-  // ✅ Only show searched employee (no list by default)
-  function filterHomeEmployees() {
-    const term = document.getElementById('searchEmployee').value.toLowerCase();
-    const list = document.getElementById('employeeList');
-    list.innerHTML = "";
-
-    if (term.trim() === "") return; // Hide all if no search
-
-    const match = employeesData.filter(emp => emp.name.toLowerCase().includes(term));
-    if (match.length === 0) {
-      list.innerHTML = "<p>No matching employee found.</p>";
-      return;
-    }
-
-    match.forEach(emp => {
-      const card = `
-        <div class="record-card">
-          <div class="meta">
-            <h3>${emp.name}</h3>
-            <p>${emp.position}</p>
+  arr.forEach(rec => {
+    const emp = employeesData.find(e => e.id === rec.employeeId) || {};
+    const photo = emp.photo || '';
+    const filedDate = new Date(rec.filedAt).toLocaleString();
+    const card = document.createElement('div');
+    card.className = 'request-card';
+    card.innerHTML = `
+      <div class="request-meta">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <img class="request-thumb" src="${photo}" alt="thumb">
+          <div>
+            <div style="font-weight:700">${rec.employeeName}</div>
+            <div style="color:#666">${rec.type} • ${rec.startDate} → ${rec.endDate}</div>
           </div>
-          <button onclick='viewResume("${emp.name}")'>View Resume</button>
-        </div>`;
-      list.insertAdjacentHTML("beforeend", card);
-    });
-  }
+        </div>
+        <div class="right request-actions">
+          <div style="font-size:12px;color:#666;margin-bottom:6px;">Filed: ${filedDate}</div>
+          <div>
+            <span id="status-${rec.id}" class="status-badge ${rec.status === 'Pending' ? 'status-pending' : rec.status === 'Approved' ? 'status-approved' : 'status-rejected'}">${rec.status}</span>
+            <button onclick="updateRequestStatus('${rec.id}','Approved')" style="background:#e9f9ef;color:#0a7a3b;border:none;padding:6px 8px;border-radius:6px;cursor:pointer;margin-left:8px;">Approve</button>
+            <button onclick="updateRequestStatus('${rec.id}','Rejected')" style="background:#ffeef0;color:#b20a27;border:none;padding:6px 8px;border-radius:6px;cursor:pointer;margin-left:8px;">Reject</button>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:8px;color:#333;"><strong>Reason:</strong> ${escapeHtml(rec.reason)}</div>
+    `;
+    container.appendChild(card);
+  });
+}
 
-  function viewResume(name) {
-    const emp = employeesData.find(e => e.name === name);
-    const skills = emp.skills.map(s => `<li>${s}</li>`).join("");
-    const popup = document.createElement("div");
-    popup.className = "resume-popup";
-    popup.innerHTML = `
-      <div class="resume-card">
-        <h2>${emp.name}</h2>
-        <p><strong>Position:</strong> ${emp.position}</p>
+function updateRequestStatus(reqId, newStatus) {
+  const arr = getRequestHistory();
+  const idx = arr.findIndex(r => r.id === reqId);
+  if (idx === -1) return;
+  arr[idx].status = newStatus;
+  saveRequestHistory(arr);
+  renderRequestHistoryArea();
+  renderFolderList();
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/* Folder modal functions (admin-only) */
+function openFolderModal() {
+  const role = localStorage.getItem(SESSION_ROLE);
+  if (role !== 'Admin') return;
+  document.getElementById('folderModal').style.display = 'flex';
+  renderFolderList();
+}
+function closeFolderModal() { document.getElementById('folderModal').style.display = 'none'; }
+
+function renderFolderList() {
+  const list = document.getElementById('folderList');
+  list.innerHTML = '';
+  const arr = getRequestHistory();
+  if (!arr.length) {
+    list.innerHTML = '<p style="color:#5a4a1a;">No files in folder.</p>';
+    return;
+  }
+  arr.forEach(rec => {
+    const emp = employeesData.find(e => e.id === rec.employeeId) || {};
+    const card = document.createElement('div');
+    card.className = 'request-card';
+    card.innerHTML = `
+      <div style="display:flex;gap:12px;align-items:center;">
+        <img class="request-thumb" src="${emp.photo || ''}" alt="thumb">
+        <div style="flex:1;">
+          <div style="font-weight:700">${rec.employeeName} <span style="font-weight:600;color:#666;font-size:0.9rem;">• ${rec.type}</span></div>
+          <div style="color:#666">${rec.startDate} → ${rec.endDate}</div>
+          <div style="margin-top:6px;color:#333;"><strong>Reason:</strong> ${escapeHtml(rec.reason)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;color:#666;margin-bottom:6px;">Filed: ${new Date(rec.filedAt).toLocaleString()}</div>
+          <div>
+            <span id="folder-status-${rec.id}" class="status-badge ${rec.status === 'Pending' ? 'status-pending' : rec.status === 'Approved' ? 'status-approved' : 'status-rejected'}">${rec.status}</span>
+          </div>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+/* ---------------------------
+   Records & Resumes
+   --------------------------- */
+function populateRecordsSelect() {
+  const role = localStorage.getItem(SESSION_ROLE);
+  const sel = document.getElementById('recordsSelect');
+  sel.innerHTML = '<option value="">-- Choose employee --</option>';
+  if (role !== 'Admin') return;
+  employeesData.forEach(emp => {
+    const o = document.createElement('option');
+    o.value = emp.id; o.textContent = emp.name;
+    sel.appendChild(o);
+  });
+}
+
+function toggleRecordsArea(role) {
+  if (role === 'Admin') {
+    document.getElementById('recordsAdminArea').style.display = 'block';
+    document.getElementById('recordsRestricted').style.display = 'none';
+  } else {
+    document.getElementById('recordsAdminArea').style.display = 'none';
+    document.getElementById('recordsRestricted').style.display = 'block';
+  }
+}
+
+function renderResumeCard() {
+  const id = document.getElementById('recordsSelect').value;
+  const container = document.getElementById('resumeCard');
+  container.innerHTML = '';
+  if (!id) return;
+  const emp = employeesData.find(e => e.id === id);
+  if (!emp) return;
+  const skills = emp.skills.map(s => `<li>${s}</li>`).join('');
+  const html = `
+    <div class="resume-inline-card" role="region" aria-label="Resume for ${emp.name}">
+      <img src="${emp.photo}" class="resume-photo" alt="${emp.name} photo">
+      <div class="resume-content">
+        <h3 style="margin:0 0 6px 0;">${emp.name}</h3>
+        <p style="margin:0 0 8px 0;color:#666">${emp.position}</p>
+        <p style="margin:6px 0;"><strong>Email:</strong> ${emp.email}</p>
+        <p style="margin:6px 0;"><strong>Phone:</strong> ${emp.phone}</p>
+        <p style="margin:6px 0;"><strong>Education:</strong> ${emp.education}</p>
+        <p style="margin:6px 0;"><strong>Experience:</strong> ${emp.experience}</p>
+        <p style="margin:6px 0;"><strong>Skills:</strong></p>
+        <ul style="margin-top:4px;">${skills}</ul>
+      </div>
+    </div>
+  `;
+  container.insertAdjacentHTML('beforeend', html);
+  container.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function showRecords() {
+  const container = document.getElementById('recordList');
+  const role = localStorage.getItem(SESSION_ROLE);
+  if (role !== 'Admin') {
+    container.innerHTML = '<p>Access restricted to Admin users.</p>';
+    return;
+  }
+  container.innerHTML = employeesData.map(emp => `
+    <div class="record-card">
+      <div class="meta">
+        <img class="record-thumb" src="${emp.photo}" alt="${emp.name}">
+        <div>
+          <h3 style="margin:0;">${emp.name}</h3>
+          <p style="margin:0;color:#666">${emp.position}</p>
+        </div>
+      </div>
+      <button onclick='renderPopupResume("${emp.id}")'>View Resume</button>
+    </div>
+  `).join('');
+}
+
+function renderPopupResume(id) {
+  const emp = employeesData.find(e => e.id === id);
+  if (!emp) return;
+  const skills = emp.skills.map(s => `<li>${s}</li>`).join('');
+  const popup = document.createElement('div');
+  popup.className = 'resume-popup';
+  popup.innerHTML = `
+    <div class="resume-card" role="dialog" aria-modal="true">
+      <div style="display:flex; gap:12px; align-items:center;">
+        <img src="${emp.photo}" alt="${emp.name} photo" style="width:72px;height:72px;border-radius:8px;object-fit:cover;">
+        <div>
+          <h2 style="margin:0;">${emp.name}</h2>
+          <p style="margin:0;color:#666">${emp.position}</p>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
         <p><strong>Email:</strong> ${emp.email}</p>
         <p><strong>Phone:</strong> ${emp.phone}</p>
         <p><strong>Education:</strong> ${emp.education}</p>
         <p><strong>Experience:</strong> ${emp.experience}</p>
-        <div class="skills"><strong>Skills:</strong><ul>${skills}</ul></div>
-        <button onclick="this.closest('.resume-popup').remove()">Close</button>
-      </div>`;
-    document.body.appendChild(popup);
-  }
+        <p><strong>Skills:</strong></p>
+        <ul>${skills}</ul>
+      </div>
+      <button onclick="this.closest('.resume-popup').remove()">Close</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+}
 
-  function showRecords() {
-    const container = document.getElementById("recordList");
-    container.innerHTML = employeesData.map(emp => `
-      <div class="record-card">
-        <div class="meta">
-          <h3>${emp.name}</h3>
-          <p>${emp.position}</p>
+/* ---------------------------
+   Home search
+   --------------------------- */
+function renderHomeEmployees(list = []) {
+  const container = document.getElementById("employeeList");
+  container.innerHTML = "";
+  if (!list.length) return;
+  container.innerHTML = list.map(emp => `
+    <div class="record-card">
+      <div class="meta">
+        <div style="width:36px;height:36px;border-radius:50%;overflow:hidden;">
+          <img src="${emp.photo}" style="width:36px;height:36px;object-fit:cover;">
         </div>
-        <button onclick='viewResume("${emp.name}")'>View Resume</button>
-      </div>`).join("");
-  }
+        <div>
+          <h3 style="margin:0;">${emp.name}</h3>
+          <p style="margin:0;color:#666">${emp.position}</p>
+        </div>
+      </div>
+      <button onclick='renderPopupResume("${emp.id}")'>View Resume</button>
+    </div>
+  `).join('');
+}
 
-  function submitForm() {
-    document.getElementById("formMessage").textContent = "✅ Request Submitted Successfully!";
-    setTimeout(() => { document.getElementById("formMessage").textContent = ""; }, 3000);
+function filterHomeEmployees() {
+  const term = document.getElementById('searchEmployee').value.toLowerCase();
+  const list = document.getElementById('employeeList');
+  list.innerHTML = "";
+  if (term.trim() === "") return;
+  const match = employeesData.filter(emp => emp.name.toLowerCase().includes(term));
+  if (match.length === 0) {
+    list.innerHTML = "<p>No matching employee found.</p>";
+    return;
   }
+  renderHomeEmployees(match);
+}
 
-  function addEmployee() {
-    alert("New employee added successfully!");
-  }
+/* ---------------------------
+   Misc / small helpers
+   --------------------------- */
+function submitForm() { document.getElementById("formMessage").textContent = "✅ Request Submitted Successfully!"; setTimeout(()=>{document.getElementById("formMessage").textContent="";},3000); }
+function addEmployee() { alert("New employee added successfully! (Placeholder)"); }
+function cancelAdd() { alert("Cancelled adding employee."); }
+function downloadPDF(title) {
+  const { jsPDF } = window.jspdf || {};
+  if (!jsPDF) { alert('jsPDF not loaded.'); return; }
+  const doc = new jsPDF();
+  doc.text(title, 10, 10);
+  doc.text('MotorPH Corporation', 10, 270);
+  doc.text('Authorized Signatory: Jeffrey Guballo – HR Manager', 10, 280);
+  doc.save(title.replace(/\s+/g,'_') + '.pdf');
+}
 
-  function cancelAdd() {
-    alert("Cancelled adding employee.");
+/* Navigation helper */
+function showSection(id) {
+  document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'home') updateGreeting();
+  if (id === 'performance') renderPerformanceTable();
+  if (id === 'records') {
+    const role = localStorage.getItem(SESSION_ROLE);
+    toggleRecordsArea(role);
   }
+  if (id === 'payroll') populateEmployeeSelect();
+  if (id === 'requests') renderRequestHistoryArea();
+}
+
+/* Render folder on start if admin */
+renderFolderList();
+renderRequestHistoryArea();
+
 </script>
 </body>
 </html>
