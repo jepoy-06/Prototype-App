@@ -1,515 +1,1167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>MotorPH Prototype Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- html2pdf for PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 
 <style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: #f4f6f9;
-    margin: 0;
-    padding: 0;
+  /* ========== Styles kept same as requested (no layout change) ========== */
+  body { font-family: "Segoe UI", sans-serif; margin:0; background:#f4f6f9; color:#333; }
+  header { display:flex; align-items:center; background:#003366; color:#fff; padding:10px 20px; }
+  header img{ height:40px; margin-right:10px; }
+  header h1{ font-size:20px; margin:0; }
+
+  .container { display:flex; height: calc(100vh - 60px); }
+  nav { width:220px; background:#1a1a1a; color:white; display:flex; flex-direction:column; padding-top:20px; }
+  nav button { background:none; border:none; color:white; padding:12px 20px; text-align:left; cursor:pointer; font-size:15px; transition:background .2s; }
+  nav button:hover{ background:#333; }
+  nav button.active { background:#004080; }
+  nav button.clocked-in { background:#00a651; }
+  nav button.clocked-out { background:#e74c3c; }
+  main{ flex:1; padding:20px; overflow:auto; }
+  h2{ color:#004080; }
+
+  /* Login screen */
+  #loginScreen { display:flex; align-items:center; justify-content:center; height:100vh; background:#151f2e; color:white; }
+  #loginBox { background:#151f2e; color:white; padding:30px; border-radius:10px; width:360px; }
+  #loginBox h1, #loginBox h2 { text-transform:uppercase; letter-spacing:1px; }
+  input[type=text], input[type=password]{ width:100%; padding:15px; margin:8px 0; border-radius:10px; border:none; background:#e9f0fa; box-sizing:border-box; }
+  #loginBtn{ width:100%; padding:15px; background:#a7c5eb; color:#1a2a3a; border:none; border-radius:10px; margin-top:10px; cursor:pointer; font-weight:bold; font-size:16px; }
+  #loginBtn:hover{ background:#86b0e0; }
+
+  /* time card */
+  .time-card{ background:white; padding:20px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); max-width:480px; }
+  .time-card input{ width:100%; padding:8px; margin:5px 0; }
+  .time-card button{ background:#004080;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;margin-right:5px; }
+  .time-card button:hover{ background:#003060; }
+
+  table{ width:100%; border-collapse:collapse; margin-top:10px; }
+  table,th,td{ border:1px solid #ccc; }
+  th,td{ padding:8px; text-align:left; }
+  th{ background:#004080; color:white; }
+
+  .badge{ background:red;color:white;border-radius:50%;font-size:12px;padding:2px 6px;vertical-align:top;margin-left:5px; display:none; }
+
+  @media (max-width:900px){
+    .container{ flex-direction:column; height:auto; }
+    nav{ width:100%; display:flex; flex-direction:row; overflow:auto; }
+    nav button{ flex:none; white-space:nowrap; }
   }
 
-  /* small employee card used in Home and Records */
-  .record-card {
-    background: #f5f5f5;
-    padding: 12px 16px;
-    margin-bottom: 12px;
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .record-card .meta {
-    max-width: 75%;
-  }
-  .record-card h3 {
-    margin: 0 0 6px 0;
-    font-size: 1rem;
-  }
-  .record-card p {
-    margin: 0;
-    font-size: 0.9rem;
-  }
-  .record-card button {
-    background: #1b6ef3;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-left: 8px;
-  }
-
-  .resume-popup {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  .resume-card {
-    background: white;
-    padding: 20px 30px;
-    border-radius: 12px;
-    width: 420px;
-    max-width: 95%;
-  }
-  .resume-card h2 {
-    margin-bottom: 10px;
-  }
-  .resume-card p { margin: 6px 0; font-size: 0.95rem; }
-  .resume-card .skills { margin-top: 8px; }
-  .resume-card button {
-    background: crimson;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin-top: 12px;
-    cursor: pointer;
-  }
-
-  /* LOGIN PAGE */
-  #loginPage {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #007bff, #00bfff);
-  }
-  .login-card {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    width: 320px;
-    text-align: center;
-  }
-  .login-card h2 {
-    color: #007bff;
-    margin-bottom: 20px;
-  }
-  .login-card input, .login-card select {
-    width: 90%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  .login-card button {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .login-card button:hover {
-    background-color: #0056b3;
-  }
-
-  /* DASHBOARD */
-  header {
-    display: flex;
-    align-items: center;
-    background-color: #fff;
-    padding: 10px 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  header img {
-    width: 70px;
-    height: 60px;
-    margin-right: 15px;
-    border-radius: 10px;
-  }
-  header h1 {
-    color: #007bff;
-    font-size: 1.6rem;
-  }
-
-  nav {
-    background-color: #007bff;
-    padding: 10px;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  nav button {
-    background: white;
-    color: #007bff;
-    border: none;
-    margin: 5px;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-  }
-  nav button:hover {
-    background-color: #0056b3;
-    color: white;
-  }
-
-  section {
-    display: none;
-    padding: 20px 40px;
-  }
-  .active {
-    display: block;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  th, td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: center;
-  }
-  th {
-    background-color: #007bff;
-    color: white;
-  }
-
-  .summary {
-    background: #f9f9f9;
-    padding: 15px;
-    margin-top: 20px;
-    border-radius: 8px;
-  }
-  .download-btn {
-    margin-top: 10px;
-    padding: 10px 15px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  .download-btn:hover {
-    background-color: #0056b3;
-  }
-
-  #employeeSection {
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    margin-top: 20px;
-  }
-  #employeeList {
-    margin-top: 12px;
-  }
-  #searchEmployee {
-    width: 50%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #007bff;
-    border-radius: 6px;
-  }
-
-  .high-contrast {
-    background-color: #000;
-    color: #fff;
-  }
+  section{ display:none; }
+  section.active{ display:block; }
+  /* Performance metric cards (dark theme) */
+  .metric-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:100px; }
+  .metric-card{ background:white smoke; color:#1b2233; border-radius:14px; padding:16px; border:1px solid rgba(255,255,255,0.08); min-height:140px; box-shadow:0 2px 4px rgba(0,0,0,0.3); }
+  .metric-title{ display:flex; align-items:center; gap:10px; font-weight:600; font-size:14px; opacity:0.9; }
+  .metric-icon{ width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background:#1b2233; border:1px solid rgba(255,255,255,0.15); }
+  .metric-value{ font-size:28px; font-weight:700; margin-top:18px; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN PAGE -->
-<div id="loginPage">
-  <div class="login-card">
-    <h2>MotorPH Login</h2>
-    <select id="roleSelect">
-      <option value="Admin">Admin</option>
-      <option value="Employee">Employee</option>
-    </select>
-    <input type="text" id="username" placeholder="Username" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button onclick="login()">Login</button>
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div id="loginBox">
+    <div style="text-align:center;margin-bottom:30px;">
+      <h1 style="font-size:28px;font-weight:700;color:#fff;margin-bottom:5px;">WELCOME</h1>
+      <h2 style="font-size:24px;font-weight:700;color:#fff;margin-top:0;">TO MOTORPH</h2>
+      
+      <div style="margin:30px auto;width:170px;height:170px;position:relative;">
+        <img src="Motorph.png" alt="MotorPH Logo" style="width:100%;height:auto;display:none;" />
+        <img src="Motorph.png" alt="Employee Icon" style="width:100%;height:auto;" />
+      </div>
+    </div>
+
+    <div style="margin-bottom:15px;">
+      <input type="text" id="username" placeholder="Username" style="width:100%;padding:15px;border-radius:10px;border:none;background:#e9f0fa;margin-bottom:15px;box-sizing:border-box;" />
+      <input type="password" id="password" placeholder="Password" style="width:100%;padding:15px;border-radius:10px;border:none;background:#e9f0fa;box-sizing:border-box;" />
+    </div>
+
+    <div id="employeeSelectDiv" style="margin-bottom:15px;">
+      <select id="employeeSelect" style="width:100%;padding:15px;border-radius:10px;border:none;background:#e9f0fa;box-sizing:border-box;">
+        <option value="">-- Select Employee --</option>
+      </select>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:15px;">
+      <button id="adminLoginBtn" style="flex:1;padding:12px;background:#a7c5eb;color:#1a2a3a;border:none;border-radius:10px;cursor:pointer;font-weight:bold;font-size:16px;">Admin</button>
+      <button id="employeeLoginBtn" style="flex:1;padding:12px;background:#a7c5eb;color:#1a2a3a;border:none;border-radius:10px;cursor:pointer;font-weight:bold;font-size:16px;">Employee</button>
+    </div>
+    
+    <div style="text-align:center;margin-top:30px;">
+      <img src="Motorph.png" alt="Scooter" style="width:80px;height:auto;" />
+    </div>
+    
+    <p style="margin-top:10px;color:#666;font-size:13px;display:none;">
+      Admin password: <strong>12345678</strong> — Employee password: <strong>12345</strong>
+    </p>
   </div>
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" style="display:none;">
-  <header>
-    <img src="Motorph.png" alt="MotorPH logo" />
-    <h1>MotorPH Prototype Dashboard</h1>
-  </header>
+<header id="dashboardHeader" style="display:none;">
+  <img src="Motorph.png" alt="MotorPH Logo" />
+  <h1>MotorPH Prototype Dashboard</h1>
+</header>
 
-  <nav>
-    <button onclick="showSection('home')">Home</button>
-    <button onclick="showSection('performance')">Performance</button>
-    <button onclick="showSection('payroll')">Payroll</button>
-    <button onclick="showSection('requests')">Requests</button>
-    <button onclick="showSection('records')">Records</button>
-    <button onclick="showSection('addEmployee')">Add Employee</button>
-    <button onclick="logout()">Logout</button>
+<div class="container" id="dashboard" style="display:none;">
+  <nav id="sidebar" aria-label="Main navigation">
+    <button id="homeBtn" data-section="homeSection">Home</button>
+    <button id="performanceBtn" data-section="performanceSection">Performance</button>
+    <button id="payrollBtn" data-section="payrollSection">Payroll</button>
+    <button id="requestBtn" data-section="requestSection">Request <span id="notifBadge" class="badge">0</span></button>
+    <button id="recordsBtn" data-section="recordsSection">Records</button>
+    <button id="addEmployeeBtn" data-section="addEmployeeSection">Add Employee</button>
+    <button id="logoutBtn">Logout</button>
   </nav>
 
-  <!-- HOME -->
-  <section id="home" class="active">
-    <h2>Welcome to MotorPH Dashboard</h2>
-    <p>Hello, <strong id="userRole"></strong>!</p>
-    <p>Today is <span id="todayDate"></span></p>
-    <p>
-      Time In: <input type="time" id="timeIn">
-      Time Out: <input type="time" id="timeOut">
-      <button onclick="clockInOut()">Submit</button>
-    </p>
-    <small id="clockMessage" style="color:green;font-weight:600;"></small>
+  <main id="mainContent">
+    <!-- HOME -->
+    <section id="homeSection" class="active">
+      <h2>Welcome to MotorPH Dashboard</h2>
+      <p id="welcomeText"></p>
+      
+      <!-- Notifications Panel for Admin -->
+      <div id="notificationsPanel" style="background:white;border-radius:10px;padding:15px;margin-bottom:20px;box-shadow:0 2px 6px rgba(0,0,0,0.1);display:none;">
+        <h3 style="margin-top:0;color:#004080;border-bottom:1px solid #eee;padding-bottom:10px;">Notifications</h3>
+        <div id="notificationsList">
+          <!-- Notifications will be populated here -->
+          <p class="no-notifications" style="color:#888;font-style:italic;">No new notifications</p>
+        </div>
+      </div>
+      
+      <div class="time-card">
+        <p id="currentDate"></p>
+        
+        <!-- Time selection for attendance -->
+        <div style="margin-bottom:15px;">
+          <label for="timeSelect">Select Time:</label>
+          <input type="time" id="timeSelect" style="width:150px;padding:8px;margin-left:10px;">
+        </div>
+        
+        <input type="hidden" id="timeIn" readonly>
+        <input type="hidden" id="timeOut" readonly>
+        <button id="clockInBtn">Clock In</button>
+        <button id="clockOutBtn">Clock Out</button>
+      </div>
+    </section>
 
-    <div id="employeeSection">
-      <h3>Employees</h3>
-      <input type="text" id="searchEmployee" placeholder="Search employee by name..." onkeyup="filterHomeEmployees()">
-      <div id="employeeList"></div>
+    <!-- PERFORMANCE -->
+    <section id="performanceSection">
+      <h2>Performance / DTR Records</h2>
+      <div style="margin-bottom:20px;">
+        <label>Month:</label>
+        <select id="monthSelect"></select>
+        <label style="margin-left:8px">Year:</label>
+        <select id="yearSelect"></select>
+      </div>
+
+      <table id="performanceTable">
+        <thead>
+          <tr><th>Employee Name</th><th>Date</th><th>Status</th><th>Time In</th><th>Time Out</th><th>Overtime (hrs)</th><th>Total Hours</th><th>Progress</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <!-- Individual progress bars will be shown in the table -->
+
+      <!-- Performance metric cards (no layout change, added content) -->
+      <div class="metric-grid" id="perfMetricGrid">
+        <div class="metric-card">
+          <div class="metric-title"><span class="metric-icon">🗂️</span> Tasks Completed</div>
+          <div class="metric-value" id="metricTasks">0</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-title"><span class="metric-icon">🛎️</span> Feedback Received</div>
+          <div class="metric-value" id="metricFeedback">0</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-title"><span class="metric-icon">🎯</span> Goals Achieved</div>
+          <div class="metric-value" id="metricGoals">0</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-title"><span class="metric-icon">👥</span> Team Impact Score</div>
+          <div class="metric-value" id="metricImpact">0%</div>
+        </div>
+      </div>
+
+      
+    </section>
+
+    <!-- PAYROLL -->
+    <section id="payrollSection">
+      <h2>Payroll / Payslip</h2>
+
+      <!-- ADMIN-only dropdown (visible only for Admin after login) -->
+      <div id="adminPayrollSelect" style="margin-bottom:12px; display:none;">
+        <label for="adminSelectEmployee">Select Employee (Admin Only):</label>
+        <select id="adminSelectEmployee"></select>
+      </div>
+
+      <div id="payslipArea"></div>
+    </section>
+
+    <!-- REQUEST -->
+    <section id="requestSection">
+      <h2>Leave Request</h2>
+      <div style="margin-bottom:12px;">
+        <label>Leave Type:</label>
+        <select id="leaveType"><option>Vacation Leave</option><option>Sick Leave</option></select>
+        <label style="margin-left:8px">Start:</label><input type="date" id="startDate">
+        <label style="margin-left:8px">End:</label><input type="date" id="endDate"><br><br>
+        <label>Reason:</label><input type="text" id="leaveReason" style="width:60%">
+        <button id="submitRequestBtn">Submit</button>
+      </div>
+
+      <h3>Request History (Admin view shows all)</h3>
+      <table id="requestTable">
+        <thead><tr><th>Employee</th><th>Type</th><th>Start</th><th>End</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+     
+
+<!-- RECORDS -->
+<section id="recordsSection">
+  <h2>Employee Records</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;text-align:center;">
+
+    <div onclick="openResume('Beatriz Santos')">
+      <img src="1.png.png" style="width:100%;cursor:pointer;">
+      <p><b>Beatriz Santos</b><br>Customer Service Representative</p>
     </div>
-  </section>
 
-  <!-- PERFORMANCE -->
-  <section id="performance">
-    <h2>Employee Performance Report</h2>
-    <p>Month: October &nbsp;&nbsp; Year: 2025</p>
-    <table id="performanceTable">
-      <tr><th>Date</th><th>Login</th><th>Logout</th><th>Overtime</th><th>Total Hours</th><th>Status</th></tr>
-    </table>
-    <div class="summary">
-      <p><b>Days Present:</b> 20</p>
-      <p><b>Days Absent:</b> 2</p>
-      <p><b>Late Count:</b> 3</p>
-      <p><b>Total Overtime:</b> 10 hours</p>
+    <div onclick="openResume('John Rafael Castro')">
+      <img src="2.png.png" style="width:100%;cursor:pointer;">
+      <p><b>John Rafael Castro</b><br>Sales & Marketing Manager</p>
     </div>
-    <button class="download-btn" onclick="downloadPDF('Performance Report')">Download Performance Report</button>
-  </section>
 
-  <!-- PAYROLL -->
-  <section id="payroll">
-    <h2>Payroll (October 2025)</h2>
-    <p><b>Basic Salary:</b> ₱35,000.00</p>
-    <p><b>Overtime Pay:</b> ₱4,166.60</p>
-    <p><b>Gross Pay:</b> ₱39,166.60</p>
-    <p><b>Deductions:</b> SSS ₱1,250 | PhilHealth ₱875 | Pag-Ibig ₱100 | Loans ₱500</p>
-    <p><b>Net Pay:</b> ₱36,441.60</p>
-    <button class="download-btn" onclick="downloadPDF('Payslip')">Download Payslip</button>
-  </section>
+    <div onclick="openResume('Carlos Ian Martinez')">
+      <img src="3.png.png" style="width:100%;cursor:pointer;">
+      <p><b>Carlos Ian Martinez</b><br>Supply Chain & Logistic Manager</p>
+    </div>
 
-  <!-- REQUESTS -->
-  <section id="requests">
-    <h2>Leave Request</h2>
-    <label>Leave Type:</label>
-    <select><option>Vacation Leave</option><option>Sick Leave</option></select><br><br>
-    <label>Start Date:</label><input type="date"><br><br>
-    <label>End Date:</label><input type="date"><br><br>
-    <textarea rows="4" cols="40" placeholder="Enter reason for leave..."></textarea><br><br>
-    <button class="download-btn" onclick="submitForm()">Submit</button>
-    <small id="formMessage" style="color:green;font-weight:600;"></small>
-  </section>
+    <div onclick="openResume('Frederick Romualdez')">
+      <img src="4.png.png" style="width:100%;cursor:pointer;">
+      <p><b>Frederick Romualdez</b><br>Accounts Manager</p>
+    </div>
 
-  <!-- RECORDS -->
-  <section id="records">
-    <h2>Employee Records</h2>
-    <button onclick="showRecords()" class="download-btn">📁 Show Employee List</button>
-    <div id="recordList" style="margin-top:20px;"></div>
-  </section>
+    <div onclick="openResume('Daniel Lee')">
+      <img src="5.png.png" style="width:100%;cursor:pointer;">
+      <p><b>Daniel Lee</b><br>Payroll Manager</p>
+    </div>
 
-  <!-- ADD EMPLOYEE -->
-  <section id="addEmployee">
-    <h2>Add Employee</h2>
-    <input type="text" id="empName" placeholder="Employee Name"><br><br>
-    <input type="text" id="empPos" placeholder="Position"><br><br>
-    <button onclick="addEmployee()">Add</button>
-    <button onclick="cancelAdd()">Cancel</button>
-  </section>
+    <div onclick="openResume('Melissa Cruz')">
+      <img src="6.png.png" style="width:100%;cursor:pointer;">
+      <p><b>Melissa Cruz</b><br>Payroll Staff</p>
+    </div>
+
+    <div onclick="openResume('Rachele Martinez')">
+      <img src="7.png.png" style="width:100%;cursor:pointer;">
+      <p><b>Rachele Martinez</b><br>Payroll Staff</p>
+    </div>
+
+    <div onclick="openResume('Miguel Torres')">
+      <img src="8.png.png" style="width:100%;cursor:pointer;">
+      <p><b>Miguel Torres</b><br>Payroll Staff</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- RESUME POPUP MODAL -->
+<div id="resumeModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center;">
+  <div style="background:#fff;width:750px;height:1000px;padding:40px;border-radius:10px;
+  overflow-y:auto;position:relative;box-shadow:0 0 20px rgba(0,0,0,0.3);">
+    <span onclick="closeResume()" style="position:absolute;top:10px;right:20px;
+    font-size:22px;cursor:pointer;color:#555;">✖</span>
+    <div id="resumeContent"></div>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-  const today = new Date();
-  document.getElementById('todayDate').textContent = today.toDateString();
+function openResume(name) {
+  const resumeData = {
+    "Beatriz Santos": `
+      <div style="display:flex;align-items:center;gap:20px;">
+        <img src='1.png.png' style="width:120px;height:120px;border-radius:10px;object-fit:cover;">
+        <div>
+          <h2 style="margin:0;">Beatriz Santos</h2>
+          <p><b>Customer Service Representative</b></p>
+          <p>Email: beatriz.santos@motorph.com<br>Phone: 0917-123-4567</p>
+        </div>
+      </div>
+      <hr>
+      <h3>Professional Summary</h3>
+      <p>Highly motivated customer service professional with 3+ years of experience providing client support and resolving inquiries efficiently. Known for maintaining excellent client relations and achieving service excellence goals.</p>
+      <h3>Key Skills</h3>
+      <ul><li>Customer Relationship Management</li><li>Problem Solving & Communication</li><li>Time Management</li><li>Team Collaboration</li></ul>
+      <h3>Experience</h3>
+      <p><b>MotorPH</b> – Customer Service Representative (2022–Present)</p>
+      <ul><li>Assisted 100+ customers daily with a 95% satisfaction rate.</li><li>Documented client feedback to improve service processes.</li></ul>
+      <h3>Education</h3>
+      <p>BA in Communication – University of the Philippines</p>
+    `,
 
-  // ✅ Stay Logged In
-  window.onload = function() {
-    const savedRole = localStorage.getItem("userRole");
-    if (savedRole) {
-      document.getElementById('loginPage').style.display = "none";
-      document.getElementById('dashboard').style.display = "block";
-      document.getElementById('userRole').textContent = savedRole;
-    }
+    "John Rafael Castro": `
+      <div style="display:flex;align-items:center;gap:20px;">
+        <img src='2.png.png' style="width:120px;height:120px;border-radius:10px;object-fit:cover;">
+        <div>
+          <h2 style="margin:0;">John Rafael Castro</h2>
+          <p><b>Sales & Marketing Manager</b></p>
+          <p>Email: john.castro@motorph.com<br>Phone: 0918-123-4567</p>
+        </div>
+      </div>
+      <hr>
+      <h3>Summary</h3>
+      <p>Results-driven marketing leader with over 5 years of experience creating brand strategies and boosting sales performance through data-driven insights and innovative campaigns.</p>
+      <h3>Skills</h3>
+      <ul><li>Strategic Marketing</li><li>Brand Development</li><li>Team Leadership</li><li>Sales Forecasting</li></ul>
+      <h3>Experience</h3>
+      <p><b>MotorPH</b> – Sales & Marketing Manager (2021–Present)</p>
+      <ul><li>Increased sales by 25% in one year.</li><li>Developed brand campaigns across multiple platforms.</li></ul>
+      <h3>Education</h3>
+      <p>BS in Business Administration – De La Salle University</p>
+    `,
+
+    "Carlos Ian Martinez": `
+      <div style="display:flex;align-items:center;gap:20px;">
+        <img src='3.png.png' style="width:120px;height:120px;border-radius:10px;object-fit:cover;">
+        <div>
+          <h2 style="margin:0;">Carlos Ian Martinez</h2>
+          <p><b>Supply Chain & Logistic Manager</b></p>
+          <p>Email: carlos.martinez@motorph.com<br>Phone: 0919-876-5432</p>
+        </div>
+      </div>
+      <hr>
+      <h3>Professional Summary</h3>
+      <p>Experienced logistics manager with a strong record in optimizing operations and coordinating supply chain networks to reduce costs and ensure timely delivery.</p>
+      <h3>Skills</h3>
+      <ul><li>Logistics Coordination</li><li>Inventory Control</li><li>Supply Chain Management</li></ul>
+      <h3>Experience</h3>
+      <p><b>MotorPH</b> – Logistics Manager (2020–Present)</p>
+      <ul><li>Reduced costs by 18% through efficiency improvements.</li><li>Managed logistics for 3 regional hubs nationwide.</li></ul>
+      <h3>Education</h3>
+      <p>BS Industrial Engineering – Mapúa University</p>
+    `,
+
+    "Frederick Romualdez": `
+      <div style="display:flex;align-items:center;gap:20px;">
+        <img src='4.png.png' style="width:120px;height:120px;border-radius:10px;object-fit:cover;">
+        <div>
+          <h2 style="margin:0;">Frederick Romualdez</h2>
+          <p><b>Accounts Manager</b></p>
+          <p>Email: frederick.romualdez@motorph.com<br>Phone: 0920-555-7890</p>
+        </div>
+      </div>
+      <hr>
+      <h3>Summary</h3>
+      <p>Dedicated Accounts Manager with 6+ years of experience in financial reporting, payroll compliance, and tax management, ensuring full adherence to Philippine accounting standards.</p>
+      <h3>Skills</h3>
+      <ul><li>Financial Reporting</li><li>Tax Compliance</li><li>Budgeting</li><li>Leadership</li></ul>
+      <h3>Experience</h3>
+      <p><b>MotorPH</b> – Accounts Manager (2019–Present)</p>
+      <ul><li>Prepared quarterly financial reports and balance sheets.</li><li>Led a 5-member team in managing accounts payable/receivable.</li></ul>
+      <h3>Education</h3>
+      <p>BS Accountancy – Ateneo de Manila University</p>
+    `,
+
+    "Daniel Lee": `
+      <div style="display:flex;align-items:center;gap:20px;">
+        <img src='5.png.png' style="width:120px;height:120px;border-radius:10px;object-fit:cover;">
+        <div>
+          <h2 style="margin:0;">Daniel Lee</h2>
+          <p><b>Payroll Manager</b></p>
+          <p>Email: daniel.lee@motorph.com<br>Phone: 0917-888-5678</p>
+        </div>
+      </div>
+      <hr>
+      <h3>Professional Summary</h3>
+      <p>Seasoned payroll professional with extensive knowledge of statutory deductions, ensuring accurate and timely compensation for all employees under Philippine labor law.</p>
+      <h3>Skills</h3>
+      <ul><li>Payroll Management Systems</li><li>Tax & Compliance</li><li>Process Automation</li></ul>
+      <h3>Experience</h3>
+      <p><b>MotorPH</b> – Payroll Manager (2020–Present)</p>
+      <ul><li>Supervises payroll for 300+ employees monthly.</li><li>Reduced processing errors by 90% via automation.</li></ul>
+      <h3>Education</h3>
+      <p>BS Accounting – University of Santo Tomas</p>
+    `,
+
+    "Melissa Cruz": `
+      <div style="display:flex;align-items:center;gap:20px;">
+        <img src='6.png.png' style="width:120px;height:120px;border-radius:10px;object-fit:cover;">
+        <div>
+          <h2 style="margin:0;">Melissa Cruz</h2>
+          <p><b>Payroll Staff</b></p>
+          <p>Email: melissa.cruz@motorph.com<br>Phone: 0919-111-2345</p>
+        </div>
+      </div>
+      <hr>
+      <h3>Professional Summary</h3>
+      <p>Organized payroll assistant with excellent record-keeping and computation accuracy, ensuring all employees receive correct and timely pay.</p>
+      <h3>Skills</h3>
+      <ul><li>Payroll Processing</li><li>Data Entry Accuracy</li><li>Excel & Reporting</li></ul>
+      <h3>Experience</h3>
+      <p><b>MotorPH</b> – Payroll Staff (2021–Present)</p>
+      <ul><li>Assists in processing payroll records and updating deductions.</li><li>Coordinates with HR for timekeeping accuracy.</li></ul>
+      <h3>Education</h3>
+      <p>BS Business Management – Far Eastern University</p>
+    `,
+
+    "Rachele Martinez": `
+      <div style="display:flex;align-items:center;gap:20px;">
+        <img src='7.png.png' style="width:120px;height:120px;border-radius:10px;object-fit:cover;">
+        <div>
+          <h2 style="margin:0;">Rachele Martinez</h2>
+          <p><b>Payroll Staff</b></p>
+          <p>Email: rachele.martinez@motorph.com<br>Phone: 0921-444-6789</p>
+        </div>
+      </div>
+      <hr>
+      <h3>Professional Summary</h3>
+      <p>Detail-oriented payroll staff with strong background in data validation, tax computation, and record maintenance for employee compensation.</p>
+      <h3>Skills</h3>
+      <ul><li>Payroll Recordkeeping</li><li>Data Verification</li><li>Confidential Information Management</li></ul>
+      <h3>Experience</h3>
+      <p><b>MotorPH</b> – Payroll Staff (2022–Present)</p>
+      <ul><li>Prepares payroll reports and summaries for audits.</li><li>Updates employee tax and benefit details.</li></ul>
+      <h3>Education</h3>
+      <p>BSBA in HR Management – Polytechnic University of the Philippines</p>
+    `,
+
+    "Miguel Torres": `
+      <div style="display:flex;align-items:center;gap:20px;">
+        <img src='8.png.png' style="width:120px;height:120px;border-radius:10px;object-fit:cover;">
+        <div>
+          <h2 style="margin:0;">Miguel Torres</h2>
+          <p><b>Payroll Staff</b></p>
+          <p>Email: miguel.torres@motorph.com<br>Phone: 0918-777-3456</p>
+        </div>
+      </div>
+      <hr>
+      <h3>Professional Summary</h3>
+      <p>Reliable payroll clerk with strong experience in salary computation, statutory deduction filing, and assisting in company-wide payroll audits.</p>
+      <h3>Key Skills</h3>
+      <ul><li>Payroll Computation & Verification</li><li>Data Encoding</li><li>PhilHealth, SSS, Pag-IBIG Filing</li><li>Collaboration & Reporting</li></ul>
+      <h3>Work Experience</h3>
+      <p><b>MotorPH</b> – Payroll Staff (2021–Present)</p>
+      <ul><li>Processes time records and salary computations for over 250 employees.</li><li>Assists Payroll Manager in deduction reports and government remittances.</li></ul>
+      <h3>Education</h3>
+      <p>BS in Accounting Technology – University of the East</p>
+    `
   };
 
-  function login() {
-    const role = document.getElementById('roleSelect').value;
-    const user = document.getElementById('username').value;
-    const pass = document.getElementById('password').value;
+  document.getElementById("resumeContent").innerHTML = resumeData[name] || "<p>No resume available.</p>";
+  document.getElementById("resumeModal").style.display = "flex";
+}
 
-    if ((role === "Admin" && user === "admin" && pass === "admin123") ||
-        (role === "Employee" && user === "user" && pass === "user123")) {
-      localStorage.setItem("userRole", role);
-      document.getElementById('loginPage').style.display = "none";
-      document.getElementById('dashboard').style.display = "block";
-      document.getElementById('userRole').textContent = role;
-    } else {
-      alert("Invalid credentials!");
-    }
-  }
+function closeResume() {
+  document.getElementById("resumeModal").style.display = "none";
+}
+</script>
 
-  function logout() {
-    localStorage.removeItem("userRole");
-    document.getElementById('dashboard').style.display = "none";
-    document.getElementById('loginPage').style.display = "flex";
-  }
 
-  function showSection(id) {
-    document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
 
-  // ✅ Clock In/Out Reflects in Performance Table
-  function clockInOut() {
-    const timeIn = document.getElementById("timeIn").value;
-    const timeOut = document.getElementById("timeOut").value;
-    const message = document.getElementById("clockMessage");
-    const perfTable = document.getElementById("performanceTable");
-
-    if (!timeIn || !timeOut) {
-      alert("Please enter both Time In and Time Out.");
-      return;
-    }
-
-    const start = new Date(`${today.toISOString().split('T')[0]}T${timeIn}`);
-    const end = new Date(`${today.toISOString().split('T')[0]}T${timeOut}`);
-    const totalHours = ((end - start) / (1000 * 60 * 60)).toFixed(1);
-    const overtime = totalHours > 8 ? (totalHours - 8).toFixed(1) : 0;
-
-    const newRow = `
-      <tr>
-        <td>${today.toISOString().split('T')[0]}</td>
-        <td>${formatTime(timeIn)}</td>
-        <td>${formatTime(timeOut)}</td>
-        <td>${overtime}</td>
-        <td>${totalHours}</td>
-        <td>Present</td>
-      </tr>`;
-    perfTable.insertAdjacentHTML("beforeend", newRow);
-
-    message.textContent = "✅ Clock In/Out recorded successfully!";
-    setTimeout(() => { message.textContent = ""; }, 3000);
-    document.getElementById("timeIn").value = "";
-    document.getElementById("timeOut").value = "";
-  }
-
-  function formatTime(t) {
-    let [hour, minute] = t.split(":");
-    hour = parseInt(hour);
-    const suffix = hour >= 12 ? "PM" : "AM";
-    hour = ((hour + 11) % 12 + 1);
-    return `${hour}:${minute} ${suffix}`;
-  }
-
-  async function downloadPDF(title) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.text(title, 10, 10);
-    doc.text('MotorPH Corporation', 10, 270);
-    doc.text('Authorized Signatory: Jeffrey Guballo – HR Manager', 10, 280);
-    doc.save(title.replace(/\s+/g, '_') + '.pdf');
-  }
-
-  // ✅ Employee master data (8 real employees)
-  const employeesData = [
-    { name: "About Beatriz", position: "Customer Service Representative", email: "beatriz.about@motorph.com", phone: "+63 912 345 6789", education: "BS in Communication – PUP", experience: "3 years in customer support.", skills: ["Client Relations", "Communication", "CRM", "Problem Solving"] },
-    { name: "John Rafael Castro", position: "Sales and Marketing Manager", email: "john.castro@motorph.com", phone: "+63 917 555 2323", education: "BSBA Marketing – DLSU", experience: "7 years in marketing and campaigns.", skills: ["Marketing", "Leadership", "Forecasting"] },
-    { name: "Carlos Ian Martinez", position: "Supply Chain and Logistic Manager", email: "carlos.martinez@motorph.com", phone: "+63 928 112 5566", education: "BS IE – UP", experience: "6 years in logistics and supply chain.", skills: ["Inventory", "Negotiation", "Planning"] },
-    { name: "Daniel Lee", position: "Payroll Manager", email: "daniel.lee@motorph.com", phone: "+63 935 321 8899", education: "BS Accountancy – ADMU", experience: "5 years in payroll management.", skills: ["Payroll", "Tax", "Leadership"] },
-    { name: "Frederick Romualdez", position: "Accounts Manager", email: "frederick.romualdez@motorph.com", phone: "+63 915 888 9087", education: "BSBA – UST", experience: "8 years in accounting.", skills: ["Accounting", "Budgeting", "Client Relations"] },
-    { name: "Melissa Cruz", position: "Payroll Staff", email: "melissa.cruz@motorph.com", phone: "+63 916 654 2223", education: "BS Accounting Tech – FEU", experience: "2 years in payroll data entry.", skills: ["Payroll", "Accuracy", "Data Entry"] },
-    { name: "Miguel Torres", position: "HR Supervisor", email: "miguel.torres@motorph.com", phone: "+63 919 777 4561", education: "BS Psychology – DLSU", experience: "4 years in HR operations.", skills: ["Recruitment", "HRIS", "Communication"] },
-    { name: "Jeffrey Guballo", position: "HR Manager", email: "jeffrey.guballo@motorph.com", phone: "+63 927 123 4567", education: "BS Psychology – DLSU", experience: "6 years in HR and management.", skills: ["Leadership", "Communication", "Strategic Planning"] }
-  ];
-
-  // ✅ Only show searched employee (no list by default)
-  function filterHomeEmployees() {
-    const term = document.getElementById('searchEmployee').value.toLowerCase();
-    const list = document.getElementById('employeeList');
-    list.innerHTML = "";
-
-    if (term.trim() === "") return; // Hide all if no search
-
-    const match = employeesData.filter(emp => emp.name.toLowerCase().includes(term));
-    if (match.length === 0) {
-      list.innerHTML = "<p>No matching employee found.</p>";
-      return;
-    }
-
-    match.forEach(emp => {
-      const card = `
-        <div class="record-card">
-          <div class="meta">
-            <h3>${emp.name}</h3>
-            <p>${emp.position}</p>
-          </div>
-          <button onclick='viewResume("${emp.name}")'>View Resume</button>
-        </div>`;
-      list.insertAdjacentHTML("beforeend", card);
-    });
-  }
-
-  function viewResume(name) {
-    const emp = employeesData.find(e => e.name === name);
-    const skills = emp.skills.map(s => `<li>${s}</li>`).join("");
-    const popup = document.createElement("div");
-    popup.className = "resume-popup";
-    popup.innerHTML = `
-      <div class="resume-card">
-        <h2>${emp.name}</h2>
-        <p><strong>Position:</strong> ${emp.position}</p>
-        <p><strong>Email:</strong> ${emp.email}</p>
-        <p><strong>Phone:</strong> ${emp.phone}</p>
-        <p><strong>Education:</strong> ${emp.education}</p>
-        <p><strong>Experience:</strong> ${emp.experience}</p>
-        <div class="skills"><strong>Skills:</strong><ul>${skills}</ul></div>
-        <button onclick="this.closest('.resume-popup').remove()">Close</button>
-      </div>`;
-    document.body.appendChild(popup);
-  }
-
-  function showRecords() {
-    const container = document.getElementById("recordList");
-    container.innerHTML = employeesData.map(emp => `
-      <div class="record-card">
-        <div class="meta">
-          <h3>${emp.name}</h3>
-          <p>${emp.position}</p>
+    <!-- ADD EMPLOYEE -->
+    <section id="addEmployeeSection">
+      <h2>Add Employee (Admin Only)</h2>
+      <form id="addEmployeeForm" onsubmit="return false;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input id="empId" placeholder="Employee ID">
+          <input id="empName" placeholder="Name">
+          <input id="empStatus" placeholder="Status">
+          <input id="empPosition" placeholder="Position">
         </div>
-        <button onclick='viewResume("${emp.name}")'>View Resume</button>
-      </div>`).join("");
+        <div style="margin-top:8px;">
+          <input id="empBirthday" type="date" placeholder="Birthday">
+          <input id="empAddress" placeholder="Address">
+          <input id="empPhone" placeholder="Phone">
+        </div>
+        <div style="margin-top:8px;">
+          <input id="empSSS" placeholder="SSS">
+          <input id="empTIN" placeholder="TIN">
+          <input id="empPhilHealth" placeholder="PhilHealth">
+          <input id="empPagibig" placeholder="Pag-Ibig">
+        </div>
+        <div style="margin-top:8px;">
+          <input id="empSupervisor" placeholder="Immediate Supervisor">
+        </div>
+        <div style="margin-top:8px;">
+          <button type="button" id="addEmpBtn">Add Employee</button>
+          <button type="reset">Cancel</button>
+        </div>
+      </form>
+
+      <h3 style="margin-top:12px">Employee Table</h3>
+      <table id="employeeTable"><thead><tr><th>ID</th><th>Name</th><th>Position</th><th>Status</th></tr></thead><tbody></tbody></table>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* =========================
+   Storage keys & initial data
+   ========================= */
+const EMP_KEY = 'motorph_employees_v_final';
+const DTR_KEY = 'motorph_dtr_v_final';
+const REQ_KEY = 'motorph_reqs_v_final';
+const SESSION_KEY = 'motorph_session_v_final';
+const NOTIF_KEY = 'motorph_notifications_v_final';
+
+const initialEmployees = [
+  { id: "E1001", name:"Beatriz Santos", position:"Customer Service Representative", photo:"1.png", basic:30000, status:"Regular", email:"beatriz.santos@motorph.com" },
+  { id: "E1002", name:"John Rafael Castro", position:"Sales and Marketing Manager", photo:"2.png", basic:42000, status:"Regular", email:"john.castro@motorph.com" },
+  { id: "E1003", name:"Carlos Ian Martinez", position:"Supply Chain and Logistic Manager", photo:"3.png", basic:40000, status:"Regular", email:"carlos.martinez@motorph.com" },
+  { id: "E1004", name:"Frederick Romualdez", position:"Accounts Manager", photo:"4.png", basic:41000, status:"Regular", email:"frederick.romualdez@motorph.com" },
+  { id: "E1005", name:"Daniel Lee", position:"Payroll Manager", photo:"5.png", basic:38000, status:"Regular", email:"daniel.lee@motorph.com" },
+  { id: "E1006", name:"Melissa Cruz", position:"Payroll Staff", photo:"6.png", basic:25000, status:"Regular", email:"melissa.cruz@motorph.com" },
+  { id: "E1007", name:"Rachele Martinez", position:"Payroll Staff", photo:"7.png", basic:26000, status:"Regular", email:"rachele.martinez@motorph.com" },
+  { id: "E1008", name:"Miguel Torres", position:"Payroll Staff", photo:"8.png", basic:27000, status:"Regular", email:"miguel.torres@motorph.com" }
+];
+
+if(!localStorage.getItem(EMP_KEY)) localStorage.setItem(EMP_KEY, JSON.stringify(initialEmployees));
+if(!localStorage.getItem(DTR_KEY)) localStorage.setItem(DTR_KEY, JSON.stringify([]));
+if(!localStorage.getItem(REQ_KEY)) localStorage.setItem(REQ_KEY, JSON.stringify([]));
+
+/* credentials */
+const ADMIN_PASSWORD = '12345678';
+const EMP_PASSWORD = '12345';
+
+/* DOM refs */
+const loginScreen = document.getElementById('loginScreen');
+const roleSelect = document.getElementById('roleSelect');
+const employeeSelectDiv = document.getElementById('employeeSelectDiv');
+const employeeSelect = document.getElementById('employeeSelect');
+const passwordInput = document.getElementById('password');
+const loginBtn = document.getElementById('loginBtn');
+const dashboard = document.getElementById('dashboard');
+const dashboardHeader = document.getElementById('dashboardHeader');
+const welcomeText = document.getElementById('welcomeText');
+const currentDate = document.getElementById('currentDate');
+const timeInEl = document.getElementById('timeIn');
+const timeOutEl = document.getElementById('timeOut');
+const clockInBtn = document.getElementById('clockInBtn');
+const clockOutBtn = document.getElementById('clockOutBtn');
+
+const navButtons = Array.from(document.querySelectorAll('#sidebar button[data-section]'));
+const logoutBtn = document.getElementById('logoutBtn');
+const notifBadge = document.getElementById('notifBadge');
+
+const perfMonth = document.getElementById('monthSelect');
+const perfYear = document.getElementById('yearSelect');
+const perfTableBody = document.querySelector('#performanceTable tbody');
+// Performance metrics DOM refs
+const metricTasksEl = document.getElementById('metricTasks');
+const metricFeedbackEl = document.getElementById('metricFeedback');
+const metricGoalsEl = document.getElementById('metricGoals');
+const metricImpactEl = document.getElementById('metricImpact');
+
+const requestTableBody = document.querySelector('#requestTable tbody');
+const submitRequestBtn = document.getElementById('submitRequestBtn');
+const leaveTypeEl = document.getElementById('leaveType');
+const startDateEl = document.getElementById('startDate');
+const endDateEl = document.getElementById('endDate');
+const leaveReasonEl = document.getElementById('leaveReason');
+
+const adminPayrollSelect = document.getElementById('adminPayrollSelect');
+const adminSelectEmployee = document.getElementById('adminSelectEmployee');
+const payslipArea = document.getElementById('payslipArea');
+
+const employeeTableBody = document.querySelector('#employeeTable tbody');
+const addEmpBtn = document.getElementById('addEmpBtn');
+
+/* utility read/write */
+function read(key){ try { return JSON.parse(localStorage.getItem(key)); } catch(e){ return null; } }
+function write(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+/* time helpers (24-hour) */
+function nowTime24(){ return new Date().toLocaleTimeString('en-GB'); }
+function todayISO(){ return new Date().toISOString().split('T')[0]; }
+
+/* populate months & years */
+(function populateMonthYear(){
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  months.forEach(m=> perfMonth.appendChild(Object.assign(document.createElement('option'),{textContent:m})));
+  perfMonth.value = new Date().toLocaleString('en-US',{month:'long'});
+  const yNow = new Date().getFullYear();
+  for(let y=yNow-2; y<=yNow+1; y++){ perfYear.appendChild(Object.assign(document.createElement('option'),{textContent:y})); }
+  perfYear.value = yNow;
+})();
+
+/* current date update */
+function updateDate(){ currentDate.textContent = new Date().toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' }); }
+setInterval(updateDate,1000); updateDate();
+
+/* show/hide employee select on role change */
+if(roleSelect){
+  roleSelect.addEventListener('change', ()=> {
+    if(roleSelect.value === 'employee') employeeSelectDiv.style.display = 'block';
+    else employeeSelectDiv.style.display = 'none';
+  });
+}
+
+/* populate employee selects (login & admin payroll) */
+function populateEmployeeLists(){
+  const emps = read(EMP_KEY) || [];
+  // login select
+  const loginSel = employeeSelect;
+  loginSel.innerHTML = '<option value="">-- Choose Employee --</option>' + emps.map(e=>`<option value="${e.name}">${e.name}</option>`).join('');
+  // admin payroll
+  adminSelectEmployee.innerHTML = '<option value="">-- Choose Employee --</option>' + emps.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  function updateEmployeePhoto(empName){
+  const formattedName = empName.replace(/\s+/g, '_');
+  const photoPath = `images/${formattedName}.png`; // ✅ switched to .png format
+  document.getElementById('employeePhoto').src = photoPath;
+}
+
+}
+populateEmployeeLists();
+
+/* login handling */
+// Admin login button
+adminLoginBtn.addEventListener('click', ()=>{
+  const username = document.getElementById('username').value.trim();
+  const pw = document.getElementById('password').value.trim();
+  
+  if(!username){ alert('Please enter username'); return; }
+  if(!pw){ alert('Please enter password'); return; }
+  
+  if(username.toLowerCase() !== 'jepoy'){ alert('Admin username must be Jepoy'); return; }
+  if(pw !== ADMIN_PASSWORD){ alert('Invalid admin password'); return; }
+  const session = { role:'admin', name:'Jepoy' }; 
+  write(SESSION_KEY, session); 
+  openDashboard(session); 
+});
+
+// Employee login button
+employeeLoginBtn.addEventListener('click', ()=>{
+  const empName = (document.getElementById('employeeSelect')?.value || '').trim();
+  const pw = document.getElementById('password').value.trim();
+  
+  if(!empName){ alert('Please select employee'); return; }
+  if(!pw){ alert('Please enter password'); return; }
+  
+  if(pw !== EMP_PASSWORD){ alert('Invalid employee password'); return; }
+    const session = { role:'employee', name: empName }; 
+    write(SESSION_KEY, session); 
+    openDashboard(session); 
+    return;
+});
+
+/* auto-login if session present */
+window.addEventListener('load', ()=>{
+  const s = read(SESSION_KEY);
+  populateEmployeeLists();
+  populateEmployeeTable();
+  renderRequests();
+  updateNotifBadge();
+  if(s) openDashboard(s);
+});
+
+/* open dashboard */
+function openDashboard(session){
+  document.getElementById('loginScreen').style.display = 'none';
+  dashboard.style.display = 'flex';
+  dashboardHeader.style.display = 'flex';
+  welcomeText.textContent = session.role === 'admin' ? `WELCOME ADMIN! ${session.name}` : `WELCOME ${session.name}!`;
+
+  // control nav visibility
+  if(session.role === 'admin'){
+    // show all
+    document.querySelectorAll('#sidebar button').forEach(b=> b.style.display='block');
+    adminPayrollSelect.style.display = 'block';
+  } else {
+    // employees only: Home, Payroll, Request, Logout
+    document.querySelectorAll('#sidebar button').forEach(b=> b.style.display='none');
+    document.querySelector('#homeBtn').style.display = 'block';
+    document.querySelector('#payrollBtn').style.display = 'block';
+    document.querySelector('#requestBtn').style.display = 'block';
+    document.querySelector('#logoutBtn').style.display = 'block';
+    adminPayrollSelect.style.display = 'none';
   }
 
-  function submitForm() {
-    document.getElementById("formMessage").textContent = "✅ Request Submitted Successfully!";
-    setTimeout(() => { document.getElementById("formMessage").textContent = ""; }, 3000);
-  }
+  // nav click handlers
+  Array.from(document.querySelectorAll('#sidebar button[data-section]')).forEach(btn=>{
+    btn.removeEventListener('click', navButtonHandler); // avoid duplicates
+    btn.addEventListener('click', navButtonHandler);
+  });
 
-  function addEmployee() {
-    alert("New employee added successfully!");
-  }
+  // default visible section
+  showSection('homeSection');
 
-  function cancelAdd() {
-    alert("Cancelled adding employee.");
+  // update metric cards when entering dashboard
+  updatePerfMetrics();
+
+  renderAttendance();
+  renderPerformanceTable();
+  renderRequests();
+  renderPayrollForSession(session);
+  updateNotifBadge();
+}
+
+/* nav handler */
+function navButtonHandler(e){
+  const sec = this.getAttribute('data-section');
+  showSection(sec);
+}
+
+/* show section helper */
+function showSection(id){
+  document.querySelectorAll('main section').forEach(s=> s.classList.remove('active'));
+  const sec = document.getElementById(id);
+  if(sec) sec.classList.add('active');
+}
+
+/* Attendance */
+document.getElementById('clockInBtn').addEventListener('click', ()=> recordAttendance('in'));
+document.getElementById('clockOutBtn').addEventListener('click', ()=> recordAttendance('out'));
+
+function recordAttendance(type){
+  const session = read(SESSION_KEY);
+  if(!session){ alert('Please login.'); return; }
+  const records = read(DTR_KEY) || [];
+  const today = todayISO();
+  const name = session.name;
+  let rec = records.find(r => r.date === today && r.employee === name);
+  const homeBtn = document.getElementById('homeBtn');
+  
+  // Get selected time from the time selector
+  const timeSelect = document.getElementById('timeSelect');
+  let selectedTime = timeSelect.value;
+  
+  // If no time selected, use current time
+  if (!selectedTime) {
+    selectedTime = nowTime24();
   }
+  
+  if(type === 'in'){
+    if(rec && rec.timeIn){ alert('Already clocked in today.'); return; }
+    if(rec) rec.timeIn = selectedTime; else records.unshift({ employee:name, date:today, timeIn:selectedTime, timeOut:'', totalHours:0, overtime:0 });
+    write(DTR_KEY, records);
+    // Add visual feedback to home button
+    homeBtn.classList.remove('clocked-out');
+    homeBtn.classList.add('clocked-in');
+  } else {
+    if(!rec || !rec.timeIn){ alert('Please clock in first.'); return; }
+    if(rec.timeOut){ alert('Already clocked out today.'); return; }
+    rec.timeOut = selectedTime;
+    const dur = computeHours(rec.timeIn, rec.timeOut);
+    rec.totalHours = dur.toFixed(2);
+    rec.overtime = dur > 8 ? (dur - 8).toFixed(2) : 0;
+    write(DTR_KEY, records);
+    // Add visual feedback to home button
+    homeBtn.classList.remove('clocked-in');
+    homeBtn.classList.add('clocked-out');
+  }
+  renderAttendance();
+  renderPerformanceTable();
+  updateNotifBadge();
+  updatePerfMetrics();
+}
+
+function computeHours(tin, tout){
+  const today = todayISO();
+  const s = new Date(`${today}T${tin}`);
+  const e = new Date(`${today}T${tout}`);
+  const diff = (e - s) / (1000*60*60);
+  return Math.max(0, Math.round(diff*100)/100);
+}
+
+function renderAttendance(){
+  const session = read(SESSION_KEY);
+  if(!session) return;
+  const records = read(DTR_KEY) || [];
+  const rec = records.find(r => r.date === todayISO() && r.employee === session.name);
+  timeInEl.value = rec && rec.timeIn ? rec.timeIn : '';
+  timeOutEl.value = rec && rec.timeOut ? rec.timeOut : '';
+  
+  // Update home button appearance based on clock in/out status
+  const homeBtn = document.getElementById('homeBtn');
+  homeBtn.classList.remove('clocked-in', 'clocked-out');
+  if(rec && rec.timeIn && !rec.timeOut) {
+    homeBtn.classList.add('clocked-in');
+  } else if(rec && rec.timeIn && rec.timeOut) {
+    homeBtn.classList.add('clocked-out');
+  }
+}
+
+/* Performance table */
+perfMonth.addEventListener('change', renderPerformanceTable);
+perfYear.addEventListener('change', renderPerformanceTable);
+
+function renderPerformanceTable(){
+  const records = read(DTR_KEY) || [];
+  const session = read(SESSION_KEY) || {};
+  const tbody = perfTableBody; tbody.innerHTML = '';
+  const monthSel = perfMonth.value; const yearSel = Number(perfYear.value);
+  const mIndex = new Date(`${monthSel} 1, ${yearSel}`).getMonth();
+  const filtered = records.filter(r => { const d = new Date(r.date + 'T00:00:00'); return d.getFullYear()===yearSel && d.getMonth()===mIndex; });
+  const rows = session.role === 'admin' ? filtered : filtered.filter(r => r.employee === session.name);
+  
+  // Group by employee to calculate progress
+  const employeeData = {};
+  rows.forEach(r => {
+    if (!employeeData[r.employee]) {
+      employeeData[r.employee] = {
+        records: [],
+        totalHours: 0
+      };
+    }
+    employeeData[r.employee].records.push(r);
+    employeeData[r.employee].totalHours += parseFloat(r.totalHours || 0);
+  });
+  
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    const totalHours = parseFloat(r.totalHours || 0);
+    const progressPercent = Math.min(totalHours / 8 * 100, 100);
+    const progressColor = progressPercent < 50 ? '#ff4d4d' : progressPercent < 75 ? '#ffb84d' : '#00cc66';
+    const progressBar = `
+      <div style="background:#e0e0e0;border-radius:5px;width:100%;height:15px;overflow:hidden;">
+        <div style="width:${progressPercent}%;height:100%;background:${progressColor};transition:width 0.6s ease;"></div>
+      </div>
+      <span style="font-size:11px;font-weight:bold;">${totalHours} hrs</span>
+    `;
+    
+    tr.innerHTML = `<td>${r.employee}</td><td>${formatDate(r.date)}</td><td>${(r.timeIn && r.timeOut)? 'Present': 'Pending'}</td><td>${r.timeIn||'-'}</td><td>${r.timeOut||'-'}</td><td>${r.overtime||'-'}</td><td>${r.totalHours||'-'}</td><td>${progressBar}</td>`;
+    tbody.appendChild(tr);
+  });
+  // refresh metric cards after table renders
+  updatePerfMetrics();
+}
+
+function formatDate(iso){ return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB'); }
+
+/* Requests (leave) */
+submitRequestBtn.addEventListener('click', ()=>{
+  const session = read(SESSION_KEY); if(!session){ alert('Please login.'); return; }
+  const type = leaveTypeEl.value, start = startDateEl.value, end = endDateEl.value, reason = leaveReasonEl.value.trim();
+  if(!start||!end||!reason){ alert('Fill start, end and reason'); return; }
+  const reqs = read(REQ_KEY) || []; reqs.unshift({ id:'req_'+Date.now(), employee:session.name, type, start, end, reason, status:'Pending', filedAt:new Date().toISOString() });
+  write(REQ_KEY, reqs); leaveReasonEl.value=''; renderRequests(); updateNotifBadge(); 
+  // Add notification for admin
+  addNotification(`${session.name} has requested ${type} leave from ${start} to ${end}: "${reason}"`);
+  alert('Leave request submitted.');
+  updatePerfMetrics();
+});
+
+function renderRequests(){
+  const reqs = read(REQ_KEY) || []; const session = read(SESSION_KEY) || {};
+  requestTableBody.innerHTML = '';
+  const rows = session.role === 'admin' ? reqs : reqs.filter(r => r.employee === session.name);
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    const actions = session.role === 'admin' ? `<button onclick="approveRequest('${r.id}')">Approve</button> <button onclick="rejectRequest('${r.id}')">Reject</button>` : '-';
+    tr.innerHTML = `<td>${r.employee}</td><td>${r.type}</td><td>${r.start}</td><td>${r.end}</td><td>${escapeHtml(r.reason)}</td><td>${r.status}</td><td>${actions}</td>`;
+    requestTableBody.appendChild(tr);
+  });
+}
+function approveRequest(id){ const a=read(REQ_KEY)||[]; const i=a.findIndex(r=>r.id===id); if(i!==-1){ a[i].status='Approved'; write(REQ_KEY,a); renderRequests(); updateNotifBadge(); updatePerfMetrics(); } }
+function rejectRequest(id){ const a=read(REQ_KEY)||[]; const i=a.findIndex(r=>r.id===id); if(i!==-1){ a[i].status='Rejected'; write(REQ_KEY,a); renderRequests(); updateNotifBadge(); updatePerfMetrics(); } }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function updateNotifBadge(){ const pending = (read(REQ_KEY)||[]).filter(r=>r.status==='Pending').length; if(pending>0){ notifBadge.style.display='inline-block'; notifBadge.textContent = pending; } else { notifBadge.style.display='none'; } }
+
+// Update Performance metric cards based on current month and requests
+function updatePerfMetrics(){
+  const session = read(SESSION_KEY) || {};
+  if(!session.name){ return; }
+  const dtrs = read(DTR_KEY) || [];
+  const reqs = read(REQ_KEY) || [];
+
+  const monthSel = perfMonth.value; const yearSel = Number(perfYear.value);
+  const mIndex = new Date(`${monthSel} 1, ${yearSel}`).getMonth();
+
+  const monthRecords = dtrs.filter(r => { const d = new Date(r.date + 'T00:00:00'); return d.getFullYear()===yearSel && d.getMonth()===mIndex; });
+  const myRecs = monthRecords.filter(r => r.employee === session.name);
+
+  const tasksCompleted = myRecs.filter(r => r.timeIn && r.timeOut).length;
+  const goalsAchieved = myRecs.filter(r => (parseFloat(r.totalHours||0)||0) >= 8).length;
+  const feedbackReceived = reqs.filter(r => r.employee === session.name && (r.status==='Approved' || r.status==='Rejected')).length;
+
+  const names = [...new Set(monthRecords.map(r=> r.employee))];
+  const totalsByName = names.map(n => monthRecords.filter(r=> r.employee===n).reduce((s,r)=> s + (parseFloat(r.totalHours||0)||0), 0));
+  const myTotal = myRecs.reduce((s,r)=> s + (parseFloat(r.totalHours||0)||0), 0);
+  const avgTotal = totalsByName.length ? (totalsByName.reduce((s,v)=> s+v,0) / totalsByName.length) : 0;
+  const impactPercent = avgTotal > 0 ? Math.round((myTotal / avgTotal) * 100) : 0;
+
+  if(metricTasksEl) metricTasksEl.textContent = tasksCompleted;
+  if(metricGoalsEl) metricGoalsEl.textContent = goalsAchieved;
+  if(metricFeedbackEl) metricFeedbackEl.textContent = feedbackReceived;
+  if(metricImpactEl) metricImpactEl.textContent = `${impactPercent}%`;
+}
+
+/* ========== PAYROLL DEDUCTIONS (2025) ========== */
+/* SSS = 14% of basic (employee share assumed) */
+/* PhilHealth = 5% of basic */
+/* Pag-IBIG = 2% of basic */
+/* Withholding tax = progressive monthly (TRAIN-style approximation) */
+
+function computeWithholdingTaxMonthly(s){
+  s = Number(s);
+  if(s <= 20833) return 0;
+  if(s <= 33333) {
+    return (s - 20833) * 0.15;
+  }
+  if(s <= 66666){
+    // base at 33333 bracket: 1875
+    return 1875 + (s - 33333) * 0.20;
+  }
+  if(s <= 166666){
+    // base at 66666 bracket: 8541.67 approx
+    return 8541.67 + (s - 66666) * 0.25;
+  }
+  if(s <= 666666){
+    // base at 166666 bracket: 33541.67 approx
+    return 33541.67 + (s - 166666) * 0.30;
+  }
+  return 183541.67 + (s - 666666) * 0.35;
+}
+
+function computeDeductionsForBasic(basic){
+  const sss = +(basic * 0.14).toFixed(2);
+  const phil = +(basic * 0.05).toFixed(2);
+  const pagibig = +(basic * 0.02).toFixed(2);
+  const tax = +computeWithholdingTaxMonthly(basic).toFixed(2);
+  const total = +(sss + phil + pagibig + tax).toFixed(2);
+  return { sss, phil, pagibig, tax, total };
+}
+
+/* render payroll for logged session (employee or admin) */
+function renderPayrollForSession(session){
+  const emps = read(EMP_KEY) || [];
+  if(session && session.role === 'admin'){
+    adminPayrollSelect.style.display = 'block';
+    adminSelectEmployee.innerHTML = '<option value="">-- Choose Employee --</option>' + emps.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+    // attach handler (once)
+    adminSelectEmployee.removeEventListener('change', onAdminPayrollChange);
+    adminSelectEmployee.addEventListener('change', onAdminPayrollChange);
+    // select first by default
+    if(emps.length) {
+      adminSelectEmployee.value = emps[0].id;
+      renderPayslipById(emps[0].id);
+    } else {
+      payslipArea.innerHTML = '<p>No employees.</p>';
+    }
+  } else {
+    adminPayrollSelect.style.display = 'none';
+    const emp = emps.find(e => e.name === (session && session.name));
+    if(emp) renderPayslip(emp);
+    else payslipArea.innerHTML = '<p>No payroll available.</p>';
+  }
+}
+
+function onAdminPayrollChange(){
+  const id = adminSelectEmployee.value;
+  renderPayslipById(id);
+}
+
+function renderPayslipById(empId){
+  if(!empId){ payslipArea.innerHTML = ''; return; }
+  const emps = read(EMP_KEY) || [];
+  const emp = emps.find(e => e.id === empId);
+  if(emp) renderPayslip(emp);
+}
+
+/* build payslip HTML */
+function renderPayslip(emp){
+  const basic = Number(emp.basic || 0);
+  const ded = computeDeductionsForBasic(basic);
+  const net = +(basic - ded.total).toFixed(2);
+  payslipArea.innerHTML = `
+    <div style="background:#fff;padding:12px;border-radius:8px;border:1px solid #eef6ff;max-width:720px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:800;color:#004080;">MotorPH Corporation — Payslip</div>
+          <div style="color:#666">Pay Period: Oct 8, 2025 — Nov 7, 2025</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:800">${emp.name}</div>
+          <div style="color:#666">${emp.position}</div>
+          <div style="color:#666;margin-top:6px;">Date Issued: ${new Date().toLocaleDateString()}</div>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0;">
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:240px;">
+          <div style="color:#666">Basic Wage</div>
+          <div style="font-weight:800;font-size:18px">₱${basic.toLocaleString()}</div>
+        </div>
+
+        <div style="min-width:280px;">
+          <div style="color:#666">Deductions</div>
+          <table style="width:100%;margin-top:8px;border-collapse:collapse;">
+            <tr><td style="padding:6px;border:1px solid #eee">SSS (14%)</td><td style="padding:6px;border:1px solid #eee">₱${ded.sss.toLocaleString()}</td></tr>
+            <tr><td style="padding:6px;border:1px solid #eee">PhilHealth (5%)</td><td style="padding:6px;border:1px solid #eee">₱${ded.phil.toLocaleString()}</td></tr>
+            <tr><td style="padding:6px;border:1px solid #eee">Pag-IBIG (2%)</td><td style="padding:6px;border:1px solid #eee">₱${ded.pagibig.toLocaleString()}</td></tr>
+            <tr><td style="padding:6px;border:1px solid #eee">Withholding Tax</td><td style="padding:6px;border:1px solid #eee">₱${ded.tax.toLocaleString()}</td></tr>
+            <tr><th style="padding:6px;border:1px solid #eee">Total Deductions</th><th style="padding:6px;border:1px solid #eee">₱${ded.total.toLocaleString()}</th></tr>
+          </table>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;text-align:right;font-weight:800;color:#004080;">Net Pay: ₱${net.toLocaleString(undefined,{minimumFractionDigits:2})}</div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+        <button onclick="downloadPayslip('${emp.id}')">🧾 Download PDF</button>
+      </div>
+    </div>
+  `;
+}
+
+/* download payslip using html2pdf */
+function downloadPayslip(empId){
+  const emps = read(EMP_KEY) || [];
+  const emp = emps.find(e => e.id === empId) || emps[0];
+  if(!emp){ alert('No employee found'); return; }
+  const node = document.createElement('div');
+  node.style.padding = '18px';
+  node.innerHTML = `<h2>MotorPH Payslip</h2>` + payslipArea.innerHTML;
+  html2pdf().from(node).set({ margin:10, filename:`payslip_${emp.name.replace(/\s+/g,'_')}.pdf`, html2canvas:{scale:2} }).save();
+}
+
+/* Employee management */
+function populateEmployeeTable(){
+  const emps = read(EMP_KEY) || [];
+  employeeTableBody.innerHTML = emps.map(e=>`<tr><td>${e.id}</td><td>${e.name}</td><td>${e.position}</td><td>${e.status}</td></tr>`).join('');
+}
+
+/* add employee (admin-only) */
+addEmpBtn.addEventListener('click', ()=>{
+  const sess = read(SESSION_KEY);
+  if(!sess || sess.role !== 'admin'){ alert('Admin only'); return; }
+  const id = document.getElementById('empId').value.trim() || ('E' + Math.floor(Math.random()*9000 + 1000));
+  const name = document.getElementById('empName').value.trim();
+  const status = document.getElementById('empStatus').value.trim() || 'Regular';
+  const position = document.getElementById('empPosition').value.trim() || '';
+  if(!name || !position){ alert('Please enter name and position'); return; }
+  const emps = read(EMP_KEY) || [];
+  emps.push({ id, name, position, status, photo:'1.png', basic:20000 });
+  write(EMP_KEY, emps);
+  alert('Employee added. Admin notified.');
+  populateEmployeeTable(); populateEmployeeLists();
+});
+
+/* logout behavior */
+logoutBtn.addEventListener('click', ()=>{ localStorage.removeItem(SESSION_KEY); location.reload(); });
+
+/* Helpers & initial run */
+function escapeHtmlSimple(s){ const d=document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+/* Functions for notifications */
+function addNotification(message, type = 'leave') {
+  const notifications = read(NOTIF_KEY) || [];
+  notifications.push({
+    id: Date.now(),
+    message,
+    type,
+    date: new Date().toISOString(),
+    read: false
+  });
+  write(NOTIF_KEY, notifications);
+  updateNotifications();
+}
+
+function updateNotifications() {
+  const notifications = read(NOTIF_KEY) || [];
+  const notifPanel = document.getElementById('notificationsPanel');
+  const notifList = document.getElementById('notificationsList');
+  const session = read(SESSION_KEY);
+  
+  // Only show for admin
+  if (session && session.role === 'admin') {
+    notifPanel.style.display = 'block';
+    
+    // Update badge
+    const unreadCount = notifications.filter(n => !n.read).length;
+    const badge = document.querySelector('#homeBtn .badge');
+    if (unreadCount > 0) {
+      badge.style.display = 'inline';
+      badge.textContent = unreadCount;
+    } else {
+      badge.style.display = 'none';
+    }
+    
+    // Update list
+    if (notifications.length === 0) {
+      notifList.innerHTML = '<p class="no-notifications" style="color:#888;font-style:italic;">No new notifications</p>';
+    } else {
+      notifList.innerHTML = '';
+      notifications.forEach(notif => {
+        const notifItem = document.createElement('div');
+        notifItem.className = `notification-item ${notif.read ? 'read' : 'unread'}`;
+        notifItem.style.padding = '10px';
+        notifItem.style.borderBottom = '1px solid #eee';
+        notifItem.style.backgroundColor = notif.read ? 'transparent' : '#f0f7ff';
+        
+        const date = new Date(notif.date);
+        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+        
+        notifItem.innerHTML = `
+          <div style="display:flex;justify-content:space-between;">
+            <strong>${notif.type === 'leave' ? '🗓️ Leave Request' : '📝 Notification'}</strong>
+            <small style="color:#888;">${formattedDate}</small>
+          </div>
+          <p style="margin:5px 0;">${notif.message}</p>
+          ${!notif.read ? '<button class="mark-read-btn" data-id="'+notif.id+'" style="background:#004080;color:white;border:none;border-radius:3px;padding:3px 8px;font-size:12px;cursor:pointer;">Mark as read</button>' : ''}
+        `;
+        
+        notifList.appendChild(notifItem);
+      });
+      
+      // Add event listeners to mark-read buttons
+      document.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = parseInt(this.dataset.id);
+          markNotificationAsRead(id);
+        });
+      });
+    }
+  } else {
+    notifPanel.style.display = 'none';
+  }
+}
+
+function markNotificationAsRead(id) {
+  const notifications = read(NOTIF_KEY) || [];
+  const updatedNotifications = notifications.map(n => {
+    if (n.id === id) {
+      return {...n, read: true};
+    }
+    return n;
+  });
+  write(NOTIF_KEY, updatedNotifications);
+  updateNotifications();
+}
+
+/* initial population */
+populateEmployeeLists();
+populateEmployeeTable();
+renderRequests();
+updateNotifBadge();
+
+/* refresh performance periodically */
+setInterval(renderPerformanceTable, 4000);
+
+function resetPerformance() {
+    if (confirm("Are you sure you want to reset performance and go home?")) {
+        employeeData.totalHours = 0;
+        employeeData.clockInTime = null;
+        updatePerformance();
+        alert("Reset successful! Back to home.");
+    }
+}
+
 </script>
 </body>
 </html>
